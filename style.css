@@ -10,7 +10,7 @@
   --text-main: #d1d5db;
   --text-muted: #80868b;
   --wire-light: rgba(255, 255, 255, 0.05);
-  --wire-bold: rgba(179, 17, 32, 0.5); /* Significantly brighter red for the glow */
+  --wire-bold: rgba(179, 17, 32, 0.5); 
 }
 
 * { box-sizing: border-box; }
@@ -26,12 +26,14 @@ body {
 /* INTERACTIVE BACKGROUND GRIDS */
 .bg-grid, .bg-grid-glow {
   position: fixed;
-  top: -50%; left: -50%; 
-  width: 200%; height: 200%;
-  z-index: 1; /* Pulled forward to sit above the body background */
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  z-index: 1; 
   pointer-events: none;
-  /* Driven by JavaScript */
-  transform: translateY(var(--scroll-y, 0px));
+  /* Scroll Parallax effect applied to the pattern, not the element */
+  background-position: center calc(var(--scroll-y, 0px));
 }
 
 .bg-grid {
@@ -46,7 +48,7 @@ body {
     linear-gradient(var(--wire-bold) 1px, transparent 1px),
     linear-gradient(90deg, var(--wire-bold) 1px, transparent 1px);
   background-size: 40px 40px;
-  /* A 600px glowing circle that follows the mouse */
+  /* Masks the red grid to perfectly follow the mouse coordinates */
   -webkit-mask-image: radial-gradient(circle 600px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), black 0%, transparent 100%);
   mask-image: radial-gradient(circle 600px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), black 0%, transparent 100%);
 }
@@ -69,7 +71,7 @@ a:hover { color: var(--main-color); }
 
 .page {
   position: relative;
-  z-index: 10; /* Ensures content sits cleanly above the interactive grids */
+  z-index: 10; 
   max-width: 1080px;
   margin: 0 auto;
   padding: 40px 24px 120px;
@@ -100,9 +102,9 @@ a:hover { color: var(--main-color); }
   align-items: center;
   justify-content: flex-start;
   padding: 20px 0;
-  border-bottom: 1px solid var(--wire-light);
   flex-wrap: wrap;
   gap: 20px;
+  /* Border bottom has been removed entirely */
 }
 .nav-links { display: flex; gap: 32px; flex-wrap: wrap; font-size: 0.9rem; font-family: monospace; }
 
