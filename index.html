@@ -162,27 +162,27 @@
 
 <!-- Logic for Interactions -->
 <script>
-  // 1. Update CSS Variables on Mouse Move
-  document.addEventListener('mousemove', (e) => {
+  // 1. Mouse Tracking for Glowing Wire Grid
+  window.addEventListener('mousemove', (e) => {
     document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
     document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
   });
 
-  // 2. Update CSS Variables on Scroll (for parallax)
+  // 2. Parallax Scroll Effect for Background
   window.addEventListener('scroll', () => {
-    document.documentElement.style.setProperty('--scroll-y', window.scrollY);
+    // Multiplied by -0.4 to make the background move slower than the page
+    const parallaxValue = window.scrollY * -0.4;
+    document.documentElement.style.setProperty('--scroll-y', parallaxValue + 'px');
   });
 
-  // 3. Scroll Reveal Observer
+  // 3. Scroll Reveal Animation for Sections
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
-        // Optional: stop observing once revealed
-        // observer.unobserve(entry.target); 
       }
     });
-  }, { threshold: 0.1 }); // Triggers when 10% of the element is visible
+  }, { threshold: 0.1 }); 
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
