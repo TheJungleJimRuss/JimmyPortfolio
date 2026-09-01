@@ -1,7 +1,7 @@
 :root {
-  /* Initialize the mouse off-screen so the glow doesn't flash in the corner */
-  --mouse-x: -1000px;
-  --mouse-y: -1000px;
+  /* Safely initialize the mouse miles off-screen so there is no corner flash */
+  --mouse-x: -5000px;
+  --mouse-y: -5000px;
   
   /* Theme Colors */
   --bg-base: #0B0D16;
@@ -44,6 +44,9 @@ body {
     linear-gradient(var(--wire-light) 1px, transparent 1px),
     linear-gradient(90deg, var(--wire-light) 1px, transparent 1px);
   background-size: 40px 40px;
+  /* NEW: This mask erases the top 80px of the grid so it doesn't cross under your nav bar */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 80px, black 120px);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 80px, black 120px);
 }
 
 .bg-grid-glow {
@@ -51,9 +54,9 @@ body {
     linear-gradient(var(--wire-bold) 1px, transparent 1px),
     linear-gradient(90deg, var(--wire-bold) 1px, transparent 1px);
   background-size: 40px 40px;
-  /* Fixed mask syntax: hides all red lines except in a 500px circle around the mouse */
-  -webkit-mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), black 0%, transparent 500px);
-  mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), black 0%, transparent 500px);
+  /* FIXED: Cross-browser safe radial gradient syntax */
+  -webkit-mask-image: radial-gradient(400px 400px at var(--mouse-x) var(--mouse-y), black 0%, transparent 100%);
+  mask-image: radial-gradient(400px 400px at var(--mouse-x) var(--mouse-y), black 0%, transparent 100%);
 }
 
 /* SCROLL REVEAL ANIMATIONS */
@@ -107,7 +110,7 @@ a:hover { color: var(--main-color); }
   padding: 20px 0;
   flex-wrap: wrap;
   gap: 20px;
-  border: none !important; /* Explicitly guarantees no line under the nav */
+  border: none;
 }
 .nav-links { display: flex; gap: 32px; flex-wrap: wrap; font-size: 0.9rem; font-family: monospace; }
 
