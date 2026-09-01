@@ -7,6 +7,11 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- Interactive Background Layers -->
+<div class="bg-grid"></div>
+<div class="bg-grid-glow"></div>
+
 <div class="page">
 
   <div class="nav">
@@ -18,12 +23,12 @@
     </div>
   </div>
 
-  <div class="hero">
+  <div class="hero reveal">
     <h1 class="hero-name">JIMMY<br>RUSS</h1>
     <p class="hero-sub">Full-Stack Developer, UI/UX Designer, and FAA Certified Drone Pilot building digital and physical perspectives.</p>
   </div>
 
-  <div class="picker">
+  <div class="picker reveal">
     <a href="#dev" class="picker-card">
       <div class="picker-title">Development</div>
       <div class="picker-desc">Clean, scalable code built for performance and modern web standards.</div>
@@ -39,12 +44,12 @@
   </div>
 
   <!-- DEVELOPMENT -->
-  <div class="annot">01. Development</div>
-  <div id="dev" class="sec-head">
+  <div class="annot reveal">01. Development</div>
+  <div id="dev" class="sec-head reveal">
     <h2 class="sec-title">Software Engineering</h2>
     <p class="sec-desc">Recent applications, APIs, and tools I've built using React, Node.js, and Python.</p>
   </div>
-  <div class="grid-3">
+  <div class="grid-3 reveal">
     <div class="card">
       <div class="card-body">
         <div class="card-title">Flight Path Analyzer</div>
@@ -64,15 +69,15 @@
       </div>
     </div>
   </div>
-  <a href="#" class="sec-viewall">View GitHub Archive &rarr;</a>
+  <a href="#" class="sec-viewall reveal">View GitHub Archive &rarr;</a>
 
   <!-- UI/UX -->
-  <div class="annot">02. Design</div>
-  <div id="uiux" class="sec-head">
+  <div class="annot reveal">02. Design</div>
+  <div id="uiux" class="sec-head reveal">
     <h2 class="sec-title">Interface & Experience</h2>
     <p class="sec-desc">Case studies detailing my design process from wireframing to high-fidelity prototypes.</p>
   </div>
-  <div class="grid-3">
+  <div class="grid-3 reveal">
     <div class="card">
       <div class="card-body">
         <div class="card-title">Banking App Redesign</div>
@@ -92,19 +97,19 @@
       </div>
     </div>
   </div>
-  <a href="#" class="sec-viewall">View Dribbble &rarr;</a>
+  <a href="#" class="sec-viewall reveal">View Dribbble &rarr;</a>
 
   <!-- DRONE PILOTING -->
-  <div class="annot">03. Aerial</div>
-  <div id="drone" class="sec-head">
+  <div class="annot reveal">03. Aerial</div>
+  <div id="drone" class="sec-head reveal">
     <h2 class="sec-title">Drone Operations</h2>
     <p class="sec-desc">Fully licensed commercial drone pilot providing high-resolution aerial data and media.</p>
   </div>
-  <div class="drone-badge">
+  <div class="drone-badge reveal">
     <div class="badge-dot"></div>
     <div class="badge-text">FAA PART 107 CERTIFIED</div>
   </div>
-  <div class="drone-categories">
+  <div class="drone-categories reveal">
     <div class="drone-cat">
       <div class="drone-cat-label">Real Estate</div>
     </div>
@@ -118,8 +123,8 @@
       <div class="drone-cat-label">Inspections</div>
     </div>
   </div>
-  <div class="annot" style="margin-top:40px;">Fleet & Gear</div>
-  <div class="drone-equip">
+  <div class="annot reveal" style="margin-top:40px;">Fleet & Gear</div>
+  <div class="drone-equip reveal">
     <div class="equip-pill">DJI Mavic 3 Cine</div>
     <div class="equip-pill">Inspire 2</div>
     <div class="equip-pill">FPV Custom Build</div>
@@ -127,8 +132,8 @@
   </div>
 
   <!-- ABOUT -->
-  <div class="annot">04. Profile</div>
-  <div class="about">
+  <div class="annot reveal">04. Profile</div>
+  <div class="about reveal">
     <div class="about-copy">
       <h2 class="sec-title">Connecting the physical and digital.</h2>
       <p>I am a multidisciplinary creator who thrives at the intersection of hardware and software. Whether I am writing clean, scalable code for a web application, designing an intuitive user interface, or piloting a drone for a commercial shoot, my goal is always to deliver precision and impact.</p>
@@ -137,8 +142,8 @@
   </div>
 
   <!-- CONTACT -->
-  <div class="annot">05. Transmission</div>
-  <div class="contact">
+  <div class="annot reveal">05. Transmission</div>
+  <div class="contact reveal">
     <div class="contact-title">Ready to launch a project?</div>
     <p style="color:var(--text-muted);">Available for freelance opportunities and full-time roles.</p>
     <div class="contact-links">
@@ -149,10 +154,38 @@
     </div>
   </div>
 
-  <div class="footer">
+  <div class="footer reveal">
     &copy; 2026 JIMMY RUSS. ALL SYSTEMS NOMINAL.
   </div>
 
 </div>
+
+<!-- Logic for Interactions -->
+<script>
+  // 1. Update CSS Variables on Mouse Move
+  document.addEventListener('mousemove', (e) => {
+    document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+    document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
+  });
+
+  // 2. Update CSS Variables on Scroll (for parallax)
+  window.addEventListener('scroll', () => {
+    document.documentElement.style.setProperty('--scroll-y', window.scrollY);
+  });
+
+  // 3. Scroll Reveal Observer
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Optional: stop observing once revealed
+        // observer.unobserve(entry.target); 
+      }
+    });
+  }, { threshold: 0.1 }); // Triggers when 10% of the element is visible
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
 </body>
 </html>
