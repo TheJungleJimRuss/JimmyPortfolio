@@ -9,8 +9,8 @@
   --text-bright: #ffffff;
   --text-main: #d1d5db;
   --text-muted: #80868b;
-  --wire-light: rgba(255, 255, 255, 0.04);
-  --wire-bold: rgba(179, 17, 32, 0.2);
+  --wire-light: rgba(255, 255, 255, 0.05);
+  --wire-bold: rgba(179, 17, 32, 0.5); /* Significantly brighter red for the glow */
 }
 
 * { box-sizing: border-box; }
@@ -28,10 +28,10 @@ body {
   position: fixed;
   top: -50%; left: -50%; 
   width: 200%; height: 200%;
-  z-index: -1;
+  z-index: 1; /* Pulled forward to sit above the body background */
   pointer-events: none;
-  /* Scroll Parallax effect */
-  transform: translateY(calc(var(--scroll-y, 0) * -0.3px));
+  /* Driven by JavaScript */
+  transform: translateY(var(--scroll-y, 0px));
 }
 
 .bg-grid {
@@ -46,16 +46,16 @@ body {
     linear-gradient(var(--wire-bold) 1px, transparent 1px),
     linear-gradient(90deg, var(--wire-bold) 1px, transparent 1px);
   background-size: 40px 40px;
-  /* Masks the red grid to only show in a 400px circle around the mouse */
-  mask-image: radial-gradient(circle 400px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle 400px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%);
+  /* A 600px glowing circle that follows the mouse */
+  -webkit-mask-image: radial-gradient(circle 600px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), black 0%, transparent 100%);
+  mask-image: radial-gradient(circle 600px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), black 0%, transparent 100%);
 }
 
 /* SCROLL REVEAL ANIMATIONS */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 .reveal.visible {
   opacity: 1;
@@ -68,6 +68,8 @@ a { text-decoration: none; color: inherit; transition: 0.2s ease; }
 a:hover { color: var(--main-color); }
 
 .page {
+  position: relative;
+  z-index: 10; /* Ensures content sits cleanly above the interactive grids */
   max-width: 1080px;
   margin: 0 auto;
   padding: 40px 24px 120px;
