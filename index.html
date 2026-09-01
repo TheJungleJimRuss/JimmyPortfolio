@@ -177,8 +177,11 @@
   // 3. Scroll Reveal Animation for Sections
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
+      // If it enters the screen, show it. If it leaves, hide it again.
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
+      } else {
+        entry.target.classList.remove('visible');
       }
     });
   }, { threshold: 0.1 }); 
