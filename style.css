@@ -1,5 +1,4 @@
 :root {
-  /* Safely initialize the mouse miles off-screen so there is no corner flash */
   --mouse-x: -5000px;
   --mouse-y: -5000px;
   
@@ -13,8 +12,10 @@
   --text-bright: #ffffff;
   --text-main: #d1d5db;
   --text-muted: #80868b;
-  --wire-light: rgba(255, 255, 255, 0.05);
-  --wire-bold: rgba(179, 17, 32, 0.5); 
+  
+  /* Updated to yellow-ish tints instead of white/red */
+  --wire-light: rgba(220, 176, 45, 0.05); 
+  --wire-bold: rgba(220, 176, 45, 0.4); 
 }
 
 * { box-sizing: border-box; }
@@ -32,8 +33,8 @@ body {
   position: fixed;
   top: 0; 
   left: 0; 
-  width: 100vw; 
-  height: 100vh;
+  width: 100%; 
+  height: 100%;
   z-index: 1; 
   pointer-events: none;
   background-position: 0px var(--scroll-y, 0px);
@@ -44,9 +45,6 @@ body {
     linear-gradient(var(--wire-light) 1px, transparent 1px),
     linear-gradient(90deg, var(--wire-light) 1px, transparent 1px);
   background-size: 40px 40px;
-  /* NEW: This mask erases the top 80px of the grid so it doesn't cross under your nav bar */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 80px, black 120px);
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 80px, black 120px);
 }
 
 .bg-grid-glow {
@@ -54,9 +52,8 @@ body {
     linear-gradient(var(--wire-bold) 1px, transparent 1px),
     linear-gradient(90deg, var(--wire-bold) 1px, transparent 1px);
   background-size: 40px 40px;
-  /* FIXED: Cross-browser safe radial gradient syntax */
-  -webkit-mask-image: radial-gradient(400px 400px at var(--mouse-x) var(--mouse-y), black 0%, transparent 100%);
-  mask-image: radial-gradient(400px 400px at var(--mouse-x) var(--mouse-y), black 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), black 0%, transparent 400px);
+  mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), black 0%, transparent 400px);
 }
 
 /* SCROLL REVEAL ANIMATIONS */
@@ -73,14 +70,14 @@ body {
 /* TYPOGRAPHY & LINKS */
 h1, h2, h3, p { margin: 0; }
 a { text-decoration: none; color: inherit; transition: 0.2s ease; }
-a:hover { color: var(--main-color); }
+a:hover { color: var(--accent-color); /* Updated to yellow accent */ }
 
 .page {
   position: relative;
   z-index: 10; 
   max-width: 1080px;
   margin: 0 auto;
-  padding: 40px 24px 120px;
+  padding: 0 24px 120px; 
 }
 
 .annot {
@@ -107,24 +104,29 @@ a:hover { color: var(--main-color); }
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 20px 0;
   flex-wrap: wrap;
   gap: 20px;
   border: none;
+  background-color: var(--bg-base);
+  padding: 40px 0 20px; 
+  margin: 0;
+  position: relative;
+  z-index: 20;
 }
 .nav-links { display: flex; gap: 32px; flex-wrap: wrap; font-size: 0.9rem; font-family: monospace; }
 
 /* HERO */
 .hero { 
-  display: flex; flex-direction: column; gap: 24px; padding: 140px 0; 
+  display: flex; flex-direction: column; gap: 24px; padding: 100px 0 140px; 
   text-align: center; align-items: center;
 }
 .hero-name { 
-  font-size: clamp(3rem, 6vw, 5rem); 
-  font-weight: 800; 
+  /* Increased the font size significantly here */
+  font-size: clamp(4.5rem, 12vw, 8rem); 
+  font-weight: 900; 
   color: var(--text-bright);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 .hero-sub { 
   font-size: 1.2rem; 
@@ -144,9 +146,9 @@ a:hover { color: var(--main-color); }
   transition: all 0.2s ease;
 }
 .picker-card:hover {
-  border-color: var(--main-color);
+  border-color: var(--accent-color); /* Updated to yellow accent */
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(179, 17, 32, 0.1);
+  box-shadow: 0 8px 30px rgba(220, 176, 45, 0.1);
 }
 .picker-title { font-weight: 600; color: var(--text-bright); font-size: 1.1rem; }
 .picker-desc { font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); }
@@ -156,7 +158,7 @@ a:hover { color: var(--main-color); }
 .sec-title { font-size: 2.2rem; font-weight: 700; color: var(--text-bright); }
 .sec-desc { font-size: 1.1rem; color: var(--text-muted); max-width: 500px; line-height: 1.6;}
 .sec-viewall { 
-  font-size: 0.85rem; font-family: monospace; color: var(--main-color); 
+  font-size: 0.85rem; font-family: monospace; color: var(--accent-color); /* Updated to yellow accent */
   display: inline-block; margin-top: 32px; text-transform: uppercase;
 }
 
@@ -169,7 +171,7 @@ a:hover { color: var(--main-color); }
   overflow: hidden;
   transition: border-color 0.3s ease;
 }
-.card:hover { border-color: var(--text-main); }
+.card:hover { border-color: var(--accent-color); /* Updated to yellow accent */ }
 .card-body { 
   padding: 60px 24px; 
   display: flex; 
@@ -214,7 +216,7 @@ a:hover { color: var(--main-color); }
   min-height: 120px;
   transition: border-color 0.3s ease;
 }
-.drone-cat:hover { border-color: var(--text-main); }
+.drone-cat:hover { border-color: var(--accent-color); /* Updated to yellow accent */ }
 .drone-cat-label { font-size: 1rem; font-weight: 500; color: var(--text-bright); text-align: center; }
 
 .drone-equip {
@@ -264,6 +266,6 @@ a:hover { color: var(--main-color); }
 @media (max-width: 760px) {
   .picker, .grid-3 { grid-template-columns: 1fr; gap: 24px; }
   .drone-categories { grid-template-columns: repeat(2, 1fr); }
-  .hero-name { font-size: 2.5rem; }
+  .hero-name { font-size: 3rem; }
   .hero { padding: 80px 0; }
 }
