@@ -170,7 +170,6 @@
 
   // 2. Parallax Scroll Effect for Background
   window.addEventListener('scroll', () => {
-    // Multiplied by -0.4 to make the background move slower than the page
     const parallaxValue = window.scrollY * -0.4;
     document.documentElement.style.setProperty('--scroll-y', parallaxValue + 'px');
   });
