@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- Interactive Background Layers -->
+<!--background layers-->
 <div class="bg-grid"></div>
 <div class="bg-grid-glow"></div>
 
@@ -98,7 +98,7 @@
   </div>
   <a href="#" class="sec-viewall reveal">View Dribbble &rarr;</a>
 
-  <!-- DRONE PILOTING -->
+  <!-- DRONES -->
   <div class="annot reveal">03</div>
   <div id="drone" class="sec-head reveal">
     <h2 class="sec-title">Drone Operations</h2>
@@ -123,7 +123,7 @@
     </div>
   </div>
   
-  <h3 class="sec-subtitle reveal">Fleet & Gear</h3>
+  <h3 class="sec-subtitle reveal">Gear</h3>
   <div class="drone-equip reveal">
     <div class="equip-pill">Equipment 1</div>
     <div class="equip-pill">Equipment 2</div>
@@ -131,7 +131,7 @@
     <div class="equip-pill">Equipment 4</div>
   </div>
 
-  <!-- ABOUT -->
+  <!--about-->
   <div class="annot reveal">04</div>
   <div class="about reveal">
     <div class="about-copy">
@@ -141,7 +141,7 @@
     </div>
   </div>
 
-  <!-- CONTACT -->
+  <!--contact-->
   <div class="annot reveal">05</div>
   <div class="contact reveal">
     <div class="contact-title">[ Call to Action Header ]</div>
@@ -150,7 +150,6 @@
       <a href="#">Email</a>
       <a href="#">LinkedIn</a>
       <a href="#">GitHub</a>
-      <a href="#">Instagram</a>
     </div>
   </div>
 
@@ -166,7 +165,7 @@
     document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
     document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
   });
-
+  
   window.addEventListener('scroll', () => {
     const parallaxValue = window.scrollY * -0.4;
     document.documentElement.style.setProperty('--scroll-y', parallaxValue + 'px');
