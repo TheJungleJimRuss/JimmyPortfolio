@@ -155,26 +155,23 @@
   </div>
 
   <div class="footer reveal">
-    &copy; 2026 JIMMY RUSS. ALL SYSTEMS NOMINAL.
+    &copy; 2026 JIMMY RUSS.
   </div>
 
 </div>
 
-<!-- Logic for Interactions -->
 <script>
-  // 1. Mouse Tracking for Glowing Wire Grid
+  // mouse tracker
   window.addEventListener('mousemove', (e) => {
     document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
     document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
   });
 
-  // 2. Parallax Scroll Effect for Background
   window.addEventListener('scroll', () => {
     const parallaxValue = window.scrollY * -0.4;
     document.documentElement.style.setProperty('--scroll-y', parallaxValue + 'px');
   });
 
-  // 3. Scroll Reveal Animation for Sections
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
