@@ -1,0 +1,369 @@
+/* Gateway & Dual-Identity Hero Styles */
+:root {
+  --gateway-bg: #070707;
+  --gateway-dev-green: #00ff41;
+  --gateway-dev-glow: rgba(0, 255, 65, 0.45);
+  --gateway-drone-sky: #64b5f6;
+  --gateway-drone-glow: rgba(100, 181, 246, 0.4);
+  --gateway-text-obsidian: #e6e6e6;
+  --gateway-subtext: #888888;
+}
+
+.wf-gateway-view,
+.wf-gateway-view *,
+.wf-gateway-view *::before,
+.wf-gateway-view *::after {
+  box-sizing: border-box;
+}
+
+.wf-gateway-view {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: var(--gateway-bg);
+  color: var(--gateway-text-obsidian);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 32px;
+  overflow: hidden;
+  user-select: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.wf-gateway-view[hidden] {
+  display: none !important;
+}
+
+/* Gateway Top Bar */
+.wf-gateway-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+}
+
+/* Minimalist Borderless Audio Switch */
+.wf-gateway-audio-minimal {
+  background: transparent;
+  border: none;
+  color: #727b88;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wf-gateway-audio-minimal:hover,
+.wf-gateway-audio-minimal:focus-visible {
+  color: #d0d7e2;
+  outline: none;
+}
+
+.wf-gateway-audio-minimal.is-active {
+  color: var(--gateway-dev-green);
+}
+
+.wf-gateway-audio-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #555c68;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wf-gateway-audio-minimal.is-active .wf-gateway-audio-dot {
+  background-color: var(--gateway-dev-green);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+}
+
+.wf-gateway-audio-hint {
+  color: #4a515e;
+  font-size: 0.68rem;
+  transition: color 0.2s ease;
+}
+
+.wf-gateway-audio-minimal:hover .wf-gateway-audio-hint,
+.wf-gateway-audio-minimal.is-active .wf-gateway-audio-hint {
+  color: inherit;
+}
+
+.wf-gateway-audio-btn.is-active .wf-gateway-audio-dot {
+  background-color: var(--gateway-dev-green);
+}
+
+/* Centerpiece Container */
+.wf-gateway-center {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+/* Dual Identity Hero Name 3D Typography */
+.wf-gateway-hero-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 10px 20px;
+  cursor: default;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+}
+
+/* WebGL True Solid 3D Canvas */
+.wf-gateway-hero-canvas {
+  display: none;
+  width: 100%;
+  max-width: 1180px;
+  height: clamp(200px, 28vw, 360px);
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+.wf-gateway-hero-anchor.has-3d .wf-gateway-hero-canvas {
+  display: block;
+}
+
+.wf-gateway-hero-anchor.has-3d .wf-gateway-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.wf-gateway-name {
+  font-family: var(--font-hero);
+  font-size: clamp(3.5rem, 10.5vw, 9.2rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.12s ease-out;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* 3D Volumetric Extruded Slices (Physical Solid Letter Slabs) */
+.wf-3d-slice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transform: translateZ(calc(var(--layer-index, 0) * 2.2px));
+  transform-style: preserve-3d;
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+/* Extruded Matte Side Walls (High Contrast Slate-Graphite Tonal Ramp) */
+.wf-3d-slice.is-side {
+  color: var(--side-color, #606876);
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.85);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Front Face */
+.wf-3d-slice.is-front {
+  position: relative;
+  color: #f8f9fc;
+  text-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.6);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Dev Hover State: Matte Phosphor Green Letter Emission */
+.wf-gateway-hero-anchor[data-state='dev'] .wf-3d-slice.is-front {
+  color: #ffffff;
+  text-shadow:
+    0 0 10px rgba(0, 255, 65, 0.95),
+    0 0 25px rgba(0, 255, 65, 0.75),
+    0 0 45px rgba(0, 255, 65, 0.45);
+}
+
+.wf-gateway-hero-anchor[data-state='dev'] .wf-3d-slice.is-side {
+  color: #00aa33 !important;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+}
+
+/* Drone Hover State: Matte Sky Blue Letter Emission */
+.wf-gateway-hero-anchor[data-state='drone'] .wf-3d-slice.is-front {
+  color: #ffffff;
+  text-shadow:
+    0 0 10px rgba(100, 181, 246, 0.95),
+    0 0 25px rgba(100, 181, 246, 0.75),
+    0 0 45px rgba(100, 181, 246, 0.45);
+}
+
+.wf-gateway-hero-anchor[data-state='drone'] .wf-3d-slice.is-side {
+  color: #42a5f5 !important;
+  text-shadow: 0 0 8px rgba(100, 181, 246, 0.6);
+}
+
+/* Minimalist Typographic Pathways */
+.wf-gateway-pathways-minimal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 32px;
+  width: auto;
+  z-index: 3;
+}
+
+.wf-gateway-path-divider {
+  color: #3b4350;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.wf-gateway-link {
+  background: transparent;
+  border: none;
+  padding: 6px 2px;
+  cursor: pointer;
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #8c96a5;
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  user-select: none;
+}
+
+.wf-gateway-link-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #555e6d;
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wf-gateway-link-text {
+  font-weight: 500;
+}
+
+/* Animated Subtle Hairline Underline */
+.wf-gateway-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.35s ease, box-shadow 0.35s ease;
+  pointer-events: none;
+}
+
+.wf-gateway-link:hover::after,
+.wf-gateway-link:focus-visible::after {
+  width: 100%;
+}
+
+.wf-gateway-link:focus-visible {
+  outline: 1px dotted #777777;
+  outline-offset: 4px;
+}
+
+/* Dev Link Hover State */
+.wf-gateway-link.is-dev:hover,
+.wf-gateway-link.is-dev:focus-visible {
+  color: #ffffff;
+}
+
+.wf-gateway-link.is-dev:hover .wf-gateway-link-num,
+.wf-gateway-link.is-dev:focus-visible .wf-gateway-link-num {
+  color: var(--gateway-dev-green);
+}
+
+.wf-gateway-link.is-dev::after {
+  background: var(--gateway-dev-green);
+  box-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+/* Drone Link Hover State */
+.wf-gateway-link.is-drone:hover,
+.wf-gateway-link.is-drone:focus-visible {
+  color: #ffffff;
+}
+
+.wf-gateway-link.is-drone:hover .wf-gateway-link-num,
+.wf-gateway-link.is-drone:focus-visible .wf-gateway-link-num {
+  color: var(--gateway-drone-sky);
+}
+
+.wf-gateway-link.is-drone::after {
+  background: var(--gateway-drone-sky);
+  box-shadow: 0 0 6px rgba(100, 181, 246, 0.5);
+}
+
+@media (max-width: 680px) {
+  .wf-gateway-view {
+    padding: 16px;
+  }
+  .wf-gateway-header {
+    justify-content: center;
+  }
+  .wf-gateway-hero-anchor {
+    padding: 10px 8px;
+    max-width: 100%;
+  }
+  .wf-gateway-hero-canvas {
+    width: 100%;
+    max-width: 100%;
+    height: 180px;
+  }
+  .wf-gateway-name {
+    font-size: clamp(1.5rem, 7.2vw, 2.6rem);
+    letter-spacing: -0.02em;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .wf-gateway-pathways-minimal {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+    align-items: center;
+  }
+  .wf-gateway-path-divider {
+    display: none;
+  }
+  .wf-gateway-link {
+    font-size: 0.92rem;
+    gap: 8px;
+  }
+}

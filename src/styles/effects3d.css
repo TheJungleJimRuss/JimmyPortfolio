@@ -1,0 +1,233 @@
+/* ==========================================================================
+   TRUE 3D SPATIAL TILT CARDS (PRESERVE-3D + MULTI-PLANE DEPTH)
+   ========================================================================== */
+.tilt-card-3d {
+  --card-mouse-x: 50%;
+  --card-mouse-y: 50%;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+
+  position: relative;
+  border-radius: 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 26px;
+  transform-style: preserve-3d;
+  transform: perspective(1050px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.tilt-card-3d:hover {
+  border-color: rgba(0, 240, 255, 0.38);
+  box-shadow:
+    0 24px 55px rgba(0, 0, 0, 0.6),
+    0 0 32px rgba(0, 240, 255, 0.1);
+}
+
+/* Specular Radial Sheen Layer */
+.tilt-card-3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    460px circle at var(--card-mouse-x) var(--card-mouse-y),
+    rgba(0, 240, 255, 0.13),
+    rgba(245, 190, 59, 0.04) 40%,
+    transparent 75%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tilt-card-3d:hover::before {
+  opacity: 1;
+}
+
+/* Z-Depth Layers inside 3D Cards */
+.depth-layer-1 {
+  transform: translateZ(14px);
+  transform-style: preserve-3d;
+}
+
+.depth-layer-2 {
+  transform: translateZ(26px);
+  transform-style: preserve-3d;
+}
+
+.depth-layer-3 {
+  transform: translateZ(38px);
+  transform-style: preserve-3d;
+}
+
+/* Discipline Card Specifics */
+.discipline-code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent-amber);
+  margin-bottom: 12px;
+}
+
+.discipline-title {
+  font-family: var(--font-display);
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 10px;
+}
+
+.discipline-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  margin: 0 0 18px;
+}
+
+.tag-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tech-pill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-primary);
+}
+
+/* Project Card Specifics */
+.project-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px;
+}
+
+.project-schematic-box {
+  position: relative;
+  height: 165px;
+  border-radius: 12px;
+  background: var(--bg-panel-inner);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-schematic-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.project-badge-pill {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: rgba(6, 8, 15, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent-primary);
+}
+
+.project-code-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.project-card-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 8px;
+}
+
+.project-card-summary {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+.project-metrics-mini {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 16px;
+}
+
+.metric-mini-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-mini-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.metric-mini-val {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-amber);
+}
+
+.project-card-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.project-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.project-repo-link:hover {
+  gap: 12px;
+  color: var(--text-bright);
+}
+
+/* Magnetic Interactive Elements */
+.magnetic-target {
+  display: inline-flex;
+  will-change: transform;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}

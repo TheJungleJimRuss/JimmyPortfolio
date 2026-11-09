@@ -1,0 +1,158 @@
+/* ==========================================================================
+   Minimalist Dev Intro & Hero Text Outline Trace
+   Phosphor Green (#00FF41) on Deep Black (#050505)
+   ========================================================================== */
+
+:root {
+  --color-phosphor-green: #00ff41;
+  --color-phosphor-dim: rgba(0, 255, 65, 0.2);
+  --color-phosphor-glow: rgba(0, 255, 65, 0.85);
+  --color-intro-bg: #050505;
+}
+
+/* Fullscreen terminal overlay on Dev enter */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: transparent;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--color-phosphor-green);
+  cursor: pointer;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+}
+
+.intro-overlay.is-fading {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro-prompt-wrap {
+  text-align: center;
+  user-select: none;
+}
+
+.intro-prompt {
+  font-size: clamp(0.9rem, 2.5vw, 1.25rem);
+  letter-spacing: 0.15em;
+  color: var(--color-phosphor-green);
+  text-shadow: 0 0 10px var(--color-phosphor-glow);
+}
+
+.intro-cursor {
+  display: inline-block;
+  width: 0.65em;
+  height: 1.15em;
+  background-color: var(--color-phosphor-green);
+  vertical-align: -0.15em;
+  margin-left: 6px;
+  animation: introBlink 1s infinite steps(2, start);
+  box-shadow: 0 0 8px var(--color-phosphor-glow);
+}
+
+@keyframes introBlink {
+  0%, 50% { opacity: 1; }
+  50.1%, 100% { opacity: 0; }
+}
+
+.intro-terminal-log {
+  width: 100%;
+  max-width: 680px;
+  min-height: 180px;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  line-height: 1.6;
+  text-align: left;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s ease;
+}
+
+.intro-terminal-log.is-active {
+  display: flex;
+}
+
+.intro-terminal-log.is-dissolving {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.intro-log-line {
+  color: var(--color-phosphor-green);
+  text-shadow: 0 0 6px var(--color-phosphor-dim);
+  animation: introLineIn 0.12s ease-out forwards;
+}
+
+@keyframes introLineIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Character-by-Character Vector Outline Tracer (.wf-hero-trace-svg)
+   ========================================================================== */
+
+.wf-hero-inner {
+  position: relative;
+}
+
+.wf-hero-trace-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: clamp(340px, 85vw, 840px);
+  aspect-ratio: 710 / 370;
+  height: auto;
+  overflow: visible;
+  z-index: 10;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.wf-hero-trace-svg.is-active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.wf-hero-trace-svg.is-fading-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s ease;
+}
+
+.hero-trace-path {
+  fill: transparent;
+  stroke: var(--color-phosphor-green);
+  stroke-width: 4.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px var(--color-phosphor-green)) drop-shadow(0 0 20px var(--color-phosphor-glow));
+  will-change: stroke-dashoffset, opacity;
+}
+
+/* Initially hidden while terminal is running pretend commands */
+.wf-hero-name.is-pending-intro {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Materialized state: fills in solid text smoothly */
+.wf-hero-name.is-materialized {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}

@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap');
+
+:root {
+  /* Cursor & Scroll reactive properties */
+  --mouse-x: 50vw;
+  --mouse-y: 35vh;
+  --scroll-y: 0px;
+
+  /* Safe OKLCH/Oklab interpolation tokens (visual-effects guidance) */
+  --in-oklab: ;
+  --in-oklch: ;
+
+  /* Theme tokens: High-tech dark obsidian studio palette with light-dark support */
+  --bg-base-light: #06080f;
+  --bg-base-dark: #06080f;
+  --bg-base: var(--bg-base-dark);
+
+  --bg-surface: #0c101b;
+  --bg-surface-elevated: #111726;
+  --bg-surface-glass: rgba(12, 16, 27, 0.78);
+  --bg-panel-inner: #080b13;
+
+  /* Primary Accents: Electric Cyan, Tactical Crimson, & Precision Amber */
+  --accent-cyan-light: #00d2eb;
+  --accent-cyan-dark: #00f0ff;
+  --accent-primary: var(--accent-cyan-light);
+
+  --accent-crimson: #f22943;
+  --accent-amber: #f5be3b;
+  --accent-emerald: #10b981;
+
+  --accent-cyan-glow: rgba(0, 240, 255, 0.32);
+  --accent-crimson-glow: rgba(242, 41, 67, 0.35);
+  --accent-amber-glow: rgba(245, 190, 59, 0.28);
+
+  /* Borders & Grid Wireframes */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-active: rgba(0, 240, 255, 0.55);
+  --grid-wire-base: rgba(148, 163, 184, 0.055);
+  --grid-wire-highlight: rgba(0, 240, 255, 0.42);
+
+  /* Typography colors */
+  --text-bright: #f8fafc;
+  --text-primary: #d8e0eb;
+  --text-muted: #8a96a8;
+  --text-dim: #596579;
+
+  /* Scrollbar colors */
+  --scrollbar-thumb: #243048;
+  --scrollbar-track: #070a12;
+
+  /* Font stacks */
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Fallback for browsers without light-dark() support */
+  @media (prefers-color-scheme: dark) {
+    --bg-base: var(--bg-base-dark);
+    --accent-primary: var(--accent-cyan-dark);
+  }
+
+  /* Progressive enhancement with light-dark() */
+  @supports (color: light-dark(white, black)) {
+    --bg-base: light-dark(var(--bg-base-light), var(--bg-base-dark));
+    --accent-primary: light-dark(var(--accent-cyan-light), var(--accent-cyan-dark));
+  }
+
+  /* Adapt native browser UI controls and scrollbars */
+  color-scheme: dark;
+  accent-color: var(--accent-primary);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+@supports (background: linear-gradient(in oklab, white, black)) {
+  :root {
+    --in-oklab: in oklab;
+    --in-oklch: in oklch;
+  }
+}
+
+/* Legacy fallback for WebKit/Blink browsers that do not support standard scrollbar-color */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Targeted Typography Wrapping (improve-text-layout-and-legibility guidance) */
+h1,
+h2,
+h3,
+h4,
+.balanced-heading {
+  text-wrap: balance;
+  margin-top: 0;
+}
+
+p,
+li,
+.pretty-copy {
+  text-wrap: pretty;
+}
+
+pre,
+code {
+  font-family: var(--font-mono);
+  color-scheme: dark;
+  /* Re-declare inherited color properties on subtree with explicit color-scheme */
+  accent-color: var(--accent-primary);
+}
+
+::selection {
+  background: rgba(0, 240, 255, 0.25);
+  color: var(--text-bright);
+}

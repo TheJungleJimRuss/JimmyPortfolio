@@ -1,0 +1,105 @@
+/* ==========================================================================
+   SCROLL-DRIVEN SPATIAL ANIMATIONS & PARALLAX DEPTH
+   ========================================================================== */
+@keyframes scrollRevealUp {
+  from {
+    opacity: 0;
+    transform: translateY(44px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+@keyframes parallaxFloatLayer {
+  from {
+    transform: translateY(var(--parallax-offset, 48px));
+  }
+  to {
+    transform: translateY(calc(var(--parallax-offset, 48px) * -0.35));
+  }
+}
+
+.parallax-layer-slow {
+  --parallax-offset: 28px;
+}
+
+.parallax-layer-medium {
+  --parallax-offset: 56px;
+}
+
+.parallax-layer-fast {
+  --parallax-offset: 84px;
+}
+
+/* Native CSS Scroll-Driven Animations (parallax-scroll-effects guidance) */
+@supports ((animation-timeline: view()) and (animation-range: entry)) {
+  .scroll-reveal-block {
+    animation: scrollRevealUp linear both;
+    animation-timeline: view();
+    animation-range: entry 8% cover 28%;
+  }
+
+  .parallax-wrapper {
+    view-timeline: --section-scroll;
+  }
+
+  .parallax-item {
+    animation: parallaxFloatLayer linear both;
+    animation-timeline: --section-scroll;
+    animation-range: entry 15% exit 95%;
+  }
+}
+
+/* Fallback classes managed by IntersectionObserver when view-timeline is unsupported */
+.scroll-reveal-fallback {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal-fallback.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Blueprint SVG CAD line draw animation */
+.blueprint-divider {
+  width: 100%;
+  height: 28px;
+  margin: 12px 0 42px;
+  overflow: visible;
+}
+
+.blueprint-stroke {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blueprint-divider.is-drawn .blueprint-stroke {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal-block,
+  .parallax-item {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .scroll-reveal-fallback {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .blueprint-stroke {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+}

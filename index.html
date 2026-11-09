@@ -1,191 +1,515 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tech Portfolio</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<!-- Background Layers -->
-<div class="backgroundGrid"></div>
-<div class="backgroundGridGlow"></div>
-
-<div class="pageContainer">
-
-  <div class="navigationBar">
-    <div class="navigationLinks">
-      <a href="#developmentSection">Work</a>
-      <a href="#aboutSection">About</a>
-      <a href="#contactSection">Contact</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jimmy Russ — Software &amp; Game Developer</title>
+  </head>
+  <body>
+    <!-- ==================== DEV TERMINAL INTRO OVERLAY ==================== -->
+    <div id="introOverlay" class="intro-overlay" role="region" aria-label="Dev Terminal Intro" style="display: none;">
+      <div class="intro-prompt-wrap">
+        <span class="intro-prompt">&gt; [ CLICK OR PRESS ANY KEY TO INITIALIZE ]</span>
+        <span class="intro-cursor" aria-hidden="true"></span>
+      </div>
+      <div class="intro-terminal-log" aria-live="polite"></div>
     </div>
-  </div>
 
-  <div class="heroSection scrollReveal">
-    <h1 class="heroTitle">JIMMY<br>RUSS</h1>
-    <p class="heroSubtitle">[ Your brief professional summary, tagline, or mission statement goes here. ]</p>
-  </div>
+    <!-- ==================== GATEWAY HERO & DUAL-IDENTITY PORTAL ==================== -->
+    <section id="viewGateway" class="wf-gateway-view" role="region" aria-label="Landing Gateway">
+      <header class="wf-gateway-header">
+        <button type="button" id="gatewayAudioToggle" class="wf-gateway-audio-minimal" aria-pressed="false" title="Toggle tactile sound effects [M]">
+          <span class="wf-gateway-audio-dot" aria-hidden="true"></span>
+          <span id="gatewayAudioLabel">SOUND: OFF</span>
+          <span class="wf-gateway-audio-hint">[M]</span>
+        </button>
+      </header>
 
-  <div class="skillPicker scrollReveal">
-    <a href="#developmentSection" class="skillCard">
-      <div class="skillTitle">Development</div>
-      <div class="skillDescription">[ Short description of this skill, discipline, or service. ]</div>
-    </a>
-    <a href="#uiUxSection" class="skillCard">
-      <div class="skillTitle">UI / UX Design</div>
-      <div class="skillDescription">[ Short description of this skill, discipline, or service. ]</div>
-    </a>
-    <a href="#droneSection" class="skillCard">
-      <div class="skillTitle">Drone Piloting</div>
-      <div class="skillDescription">[ Short description of this skill, discipline, or service. ]</div>
-    </a>
-  </div>
+      <div class="wf-gateway-center">
+        <div id="heroNameAnchor" class="wf-gateway-hero-anchor" data-state="none">
+          <canvas id="hero3dCanvasGateway" class="wf-gateway-hero-canvas" aria-label="JIMMY RUSS 3D Solid Text"></canvas>
+          <h1 id="heroNameText" class="wf-gateway-name">JIMMY RUSS</h1>
+        </div>
 
-  <!-- DEVELOPMENT -->
-  <div class="sectionNumber scrollReveal">01</div>
-  <div id="developmentSection" class="sectionHeader scrollReveal">
-    <h2 class="sectionTitle">Software Engineering</h2>
-    <p class="sectionDescription">[ Placeholder description detailing your engineering background, tech stack, or general approach. ]</p>
-  </div>
-  <div class="projectGrid scrollReveal">
-    <div class="projectCard">
-      <div class="projectCardBody">
-        <div class="projectTitle">Project Title</div>
-        <div class="projectTechStack">Tech Stack / Tools</div>
+        <nav id="gatewayPathways" class="wf-gateway-pathways-minimal" aria-label="Portfolio Pathways">
+          <button type="button" id="gatewayDevBtn" class="wf-gateway-link is-dev" aria-label="Enter Dev & Game Systems portfolio">
+            <span class="wf-gateway-link-num">01 //</span>
+            <span class="wf-gateway-link-text">Dev &amp; Game Systems</span>
+          </button>
+          <span class="wf-gateway-path-divider" aria-hidden="true">/</span>
+          <button type="button" id="gatewayDroneBtn" class="wf-gateway-link is-drone" aria-label="Enter Aerial Flight Ops portfolio">
+            <span class="wf-gateway-link-num">02 //</span>
+            <span class="wf-gateway-link-text">Aerial Flight Ops</span>
+          </button>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ==================== FLOATING TOP CENTER PERSONA TOGGLE ==================== -->
+    <div id="floatingToggleContainer" class="wf-floating-toggle-container" role="region" aria-label="Portfolio Persona Switcher" hidden style="display: none;">
+      <div class="wf-persona-toggle-group" role="tablist" aria-label="Portfolio Persona Toggle">
+        <button
+          type="button"
+          id="personaPillDev"
+          class="wf-persona-pill is-active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="viewOverview"
+          title="Switch to Software & Game Developer view"
+        >
+          <span class="pill-dot" aria-hidden="true"></span>
+          <span>Dev / Systems</span>
+        </button>
+        <button
+          type="button"
+          id="personaPillDrone"
+          class="wf-persona-pill"
+          role="tab"
+          aria-selected="false"
+          aria-controls="viewDroneOverview"
+          title="Switch to Commercial Drone Pilot view"
+        >
+          <span class="pill-dot" aria-hidden="true"></span>
+          <span>Drone / Flight Ops</span>
+        </button>
       </div>
     </div>
-    <div class="projectCard">
-      <div class="projectCardBody">
-        <div class="projectTitle">Project Title</div>
-        <div class="projectTechStack">Tech Stack / Tools</div>
-      </div>
-    </div>
-    <div class="projectCard">
-      <div class="projectCardBody">
-        <div class="projectTitle">Project Title</div>
-        <div class="projectTechStack">Tech Stack / Tools</div>
-      </div>
-    </div>
-  </div>
-  <a href="#" class="viewAllLink scrollReveal">View GitHub Archive &rarr;</a>
 
-  <!-- UI/UX -->
-  <div class="sectionNumber scrollReveal">02</div>
-  <div id="uiUxSection" class="sectionHeader scrollReveal">
-    <h2 class="sectionTitle">Interface & Experience</h2>
-    <p class="sectionDescription">[ Placeholder description detailing your design process, philosophy, or case study overview. ]</p>
-  </div>
-  <div class="projectGrid scrollReveal">
-    <div class="projectCard">
-      <div class="projectCardBody">
-        <div class="projectTitle">Project Title</div>
-        <div class="projectTechStack">Tech Stack / Tools</div>
-      </div>
-    </div>
-    <div class="projectCard">
-      <div class="projectCardBody">
-        <div class="projectTitle">Project Title</div>
-        <div class="projectTechStack">Tech Stack / Tools</div>
-      </div>
-    </div>
-    <div class="projectCard">
-      <div class="projectCardBody">
-        <div class="projectTitle">Project Title</div>
-        <div class="projectTechStack">Tech Stack / Tools</div>
-      </div>
-    </div>
-  </div>
-  <a href="#" class="viewAllLink scrollReveal">View Dribbble &rarr;</a>
+    <!-- ==================== VIEW 1: HOME / OVERVIEW ==================== -->
+    <div id="viewOverview">
+      <main class="wf-container">
+        <!-- HERO HEADER -->
+        <section id="hero" class="wf-hero-section">
+          <div class="wf-hero-inner">
+            <svg id="heroTraceSvg" class="wf-hero-trace-svg" viewBox="0 -150 3191 1903" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path class="hero-trace-path" data-char="J" vector-effect="non-scaling-stroke" d="M 296.0 716.0 L 296.0 716.0 Q 217.0 716.0 161.0 693.0 Q 105.0 670.0 69.0 621.0 Q 32.0 572.0 12.0 492.0 L 12.0 492.0 L 187.0 457.0 Q 198.0 515.0 219.0 544.0 Q 241.0 572.0 290.0 572.0 L 290.0 572.0 Q 337.0 572.0 358.0 546.0 Q 379.0 520.0 379.0 474.0 L 379.0 474.0 L 379.0 150.0 L 91.0 150.0 L 91.0 0.0 L 555.0 0.0 L 555.0 474.0 Q 555.0 550.0 531.0 598.0 Q 508.0 646.0 469.0 672.0 Q 431.0 697.0 385.0 707.0 Q 340.0 716.0 296.0 716.0 Z" />
+              <path class="hero-trace-path" data-char="I" vector-effect="non-scaling-stroke" d="M 822.0 703.0 L 643.0 703.0 L 643.0 -6.0 L 822.0 -6.0 L 822.0 703.0 Z" />
+              <path class="hero-trace-path" data-char="M" vector-effect="non-scaling-stroke" d="M 918.0 -6.0 L 1047.0 -6.0 L 1288.4 358.8 L 1529.0 -6.0 L 1658.0 -6.0 L 1658.0 703.0 L 1481.0 703.0 L 1481.0 340.1 L 1346.0 543.0 L 1230.0 543.0 L 1096.0 340.3 L 1096.0 703.0 L 918.0 703.0 Z" />
+              <path class="hero-trace-path" data-char="M" vector-effect="non-scaling-stroke" d="M 1754.0 -6.0 L 1883.0 -6.0 L 2124.4 358.8 L 2365.0 -6.0 L 2494.0 -6.0 L 2494.0 703.0 L 2317.0 703.0 L 2317.0 340.1 L 2182.0 543.0 L 2066.0 543.0 L 1932.0 340.3 L 1932.0 703.0 L 1754.0 703.0 Z" />
+              <path class="hero-trace-path" data-char="Y" vector-effect="non-scaling-stroke" d="M 2536.0 -6.0 L 2741.0 -6.0 L 2876.0 234.7 L 3011.0 -6.0 L 3212.0 -6.0 L 2965.0 405.7 L 2965.0 703.0 L 2786.0 703.0 L 2786.0 413.7 L 2536.0 -6.0 Z" />
+              <path class="hero-trace-path" data-char="R" vector-effect="non-scaling-stroke" d="M 437.0 934.0 L 739.0 934.0 L 747.9 934.1 L 756.7 934.4 L 765.4 934.9 L 773.9 935.7 L 782.3 936.6 L 790.6 937.8 L 798.7 939.2 L 806.8 940.8 L 814.6 942.5 L 822.4 944.5 L 830.0 946.8 L 837.4 949.2 L 844.8 951.8 L 852.0 954.7 L 859.1 957.7 L 866.0 961.0 L 872.7 964.5 L 879.1 968.1 L 885.4 971.8 L 891.6 975.8 L 897.5 979.8 L 903.3 984.1 L 908.8 988.5 L 914.3 993.0 L 919.5 997.7 L 924.5 1002.6 L 929.4 1007.6 L 934.1 1012.8 L 938.6 1018.1 L 942.9 1023.6 L 947.0 1029.2 L 951.0 1035.0 L 954.8 1040.9 L 958.3 1047.0 L 961.5 1053.2 L 964.6 1059.5 L 967.3 1065.9 L 969.9 1072.5 L 972.2 1079.2 L 974.3 1086.0 L 976.1 1092.9 L 977.6 1100.0 L 979.0 1107.2 L 980.1 1114.5 L 980.9 1121.9 L 981.5 1129.5 L 981.9 1137.2 L 982.0 1145.0 L 981.9 1152.8 L 981.5 1160.5 L 980.9 1168.1 L 980.1 1175.5 L 979.0 1182.8 L 977.6 1190.0 L 976.1 1197.1 L 974.3 1204.0 L 972.2 1210.8 L 969.9 1217.5 L 967.3 1224.1 L 964.6 1230.5 L 961.5 1236.8 L 958.3 1243.0 L 954.8 1249.1 L 951.0 1255.0 L 946.9 1260.9 L 942.6 1266.7 L 938.2 1272.2 L 933.5 1277.6 L 928.7 1282.9 L 923.6 1287.9 L 918.4 1292.8 L 913.0 1297.5 L 907.4 1302.0 L 901.6 1306.4 L 895.7 1310.6 L 889.5 1314.6 L 883.2 1318.5 L 876.6 1322.2 L 869.9 1325.7 L 863.0 1329.0 L 855.9 1332.3 L 848.7 1335.3 L 841.3 1338.2 L 833.8 1340.8 L 826.1 1343.2 L 818.3 1345.5 L 810.8 1347.4 L 1028.0 1643.0 L 821.0 1643.0 L 626.5 1356.0 L 616.0 1356.0 L 616.0 1643.0 L 437.0 1643.0 L 437.0 934.0 Z M 616.0 1067.0 L 616.0 1228.0 L 714.0 1228.0 L 719.4 1227.9 L 724.7 1227.7 L 729.8 1227.2 L 734.8 1226.6 L 739.5 1225.9 L 744.2 1224.9 L 748.7 1223.8 L 753.0 1222.5 L 757.2 1221.0 L 761.2 1219.4 L 765.0 1217.6 L 768.8 1215.6 L 772.3 1213.5 L 775.7 1211.2 L 778.9 1208.7 L 782.0 1206.0 L 784.8 1203.3 L 787.4 1200.5 L 789.8 1197.6 L 792.1 1194.5 L 794.1 1191.3 L 796.0 1188.0 L 797.7 1184.6 L 799.3 1181.0 L 800.6 1177.3 L 801.8 1173.5 L 802.8 1169.6 L 803.6 1165.5 L 804.2 1161.3 L 804.6 1157.0 L 804.9 1152.6 L 805.0 1148.0 L 804.9 1143.6 L 804.6 1139.2 L 804.2 1135.0 L 803.6 1130.8 L 802.8 1126.8 L 801.8 1122.8 L 800.6 1119.0 L 799.3 1115.3 L 797.7 1111.6 L 796.0 1108.1 L 794.1 1104.6 L 792.1 1101.3 L 789.8 1098.1 L 787.4 1095.0 L 784.8 1091.9 L 782.0 1089.0 L 778.9 1086.3 L 775.7 1083.8 L 772.3 1081.5 L 768.8 1079.4 L 765.0 1077.4 L 761.2 1075.6 L 757.2 1074.0 L 753.0 1072.5 L 748.7 1071.2 L 744.2 1070.1 L 739.5 1069.1 L 734.8 1068.4 L 729.8 1067.8 L 724.7 1067.3 L 719.4 1067.1 L 714.0 1067.0 L 616.0 1067.0 Z" />
+              <path class="hero-trace-path" data-char="U" vector-effect="non-scaling-stroke" d="M 1362.0 1654.0 L 1362.0 1654.0 Q 1272.0 1654.0 1204.0 1616.0 Q 1135.0 1579.0 1097.0 1512.0 Q 1059.0 1445.0 1059.0 1360.0 L 1059.0 1360.0 L 1059.0 934.0 L 1237.0 934.0 L 1237.0 1373.0 Q 1237.0 1411.0 1254.0 1438.0 Q 1270.0 1466.0 1299.0 1480.0 Q 1327.0 1495.0 1362.0 1495.0 L 1362.0 1495.0 Q 1398.0 1495.0 1425.0 1480.0 Q 1452.0 1466.0 1468.0 1439.0 Q 1484.0 1412.0 1484.0 1374.0 L 1484.0 1374.0 L 1484.0 934.0 L 1664.0 934.0 L 1664.0 1361.0 Q 1664.0 1446.0 1626.0 1512.0 Q 1588.0 1579.0 1521.0 1616.0 Q 1453.0 1654.0 1362.0 1654.0 Z" />
+              <path class="hero-trace-path" data-char="S" vector-effect="non-scaling-stroke" d="M 1970.0 1654.0 L 1970.0 1654.0 Q 1881.0 1654.0 1816.0 1627.0 Q 1750.0 1600.0 1696.0 1542.0 L 1696.0 1542.0 L 1809.0 1428.0 Q 1846.0 1467.0 1888.0 1487.0 Q 1930.0 1508.0 1983.0 1508.0 L 1983.0 1508.0 Q 2028.0 1508.0 2053.0 1492.0 Q 2077.0 1477.0 2077.0 1450.0 L 2077.0 1450.0 Q 2077.0 1425.0 2059.0 1408.0 Q 2041.0 1392.0 2012.0 1379.0 Q 1982.0 1367.0 1947.0 1355.0 Q 1911.0 1344.0 1876.0 1327.0 Q 1840.0 1311.0 1811.0 1287.0 Q 1781.0 1263.0 1763.0 1227.0 Q 1745.0 1191.0 1745.0 1138.0 L 1745.0 1138.0 Q 1745.0 1070.0 1778.0 1022.0 Q 1810.0 974.0 1868.0 948.0 Q 1926.0 922.0 2003.0 922.0 L 2003.0 922.0 Q 2080.0 922.0 2145.0 948.0 Q 2210.0 974.0 2252.0 1020.0 L 2252.0 1020.0 L 2138.0 1133.0 Q 2106.0 1101.0 2073.0 1085.0 Q 2040.0 1069.0 2001.0 1069.0 L 2001.0 1069.0 Q 1964.0 1069.0 1943.0 1082.0 Q 1922.0 1095.0 1922.0 1119.0 L 1922.0 1119.0 Q 1922.0 1143.0 1940.0 1158.0 Q 1958.0 1173.0 1988.0 1184.0 Q 2017.0 1196.0 2053.0 1208.0 Q 2088.0 1220.0 2123.0 1236.0 Q 2158.0 1252.0 2188.0 1277.0 Q 2217.0 1302.0 2235.0 1340.0 Q 2253.0 1378.0 2253.0 1432.0 L 2253.0 1432.0 Q 2253.0 1538.0 2179.0 1596.0 Q 2104.0 1654.0 1970.0 1654.0 Z" />
+              <path class="hero-trace-path" data-char="S" vector-effect="non-scaling-stroke" d="M 2536.0 1654.0 L 2536.0 1654.0 Q 2447.0 1654.0 2382.0 1627.0 Q 2316.0 1600.0 2262.0 1542.0 L 2262.0 1542.0 L 2375.0 1428.0 Q 2412.0 1467.0 2454.0 1487.0 Q 2496.0 1508.0 2549.0 1508.0 L 2549.0 1508.0 Q 2594.0 1508.0 2619.0 1492.0 Q 2643.0 1477.0 2643.0 1450.0 L 2643.0 1450.0 Q 2643.0 1425.0 2625.0 1408.0 Q 2607.0 1392.0 2578.0 1379.0 Q 2548.0 1367.0 2513.0 1355.0 Q 2477.0 1344.0 2442.0 1327.0 Q 2406.0 1311.0 2377.0 1287.0 Q 2347.0 1263.0 2329.0 1227.0 Q 2311.0 1191.0 2311.0 1138.0 L 2311.0 1138.0 Q 2311.0 1070.0 2344.0 1022.0 Q 2376.0 974.0 2434.0 948.0 Q 2492.0 922.0 2569.0 922.0 L 2569.0 922.0 Q 2646.0 922.0 2711.0 948.0 Q 2776.0 974.0 2818.0 1020.0 L 2818.0 1020.0 L 2704.0 1133.0 Q 2672.0 1101.0 2639.0 1085.0 Q 2606.0 1069.0 2567.0 1069.0 L 2567.0 1069.0 Q 2530.0 1069.0 2509.0 1082.0 Q 2488.0 1095.0 2488.0 1119.0 L 2488.0 1119.0 Q 2488.0 1143.0 2506.0 1158.0 Q 2524.0 1173.0 2554.0 1184.0 Q 2583.0 1196.0 2619.0 1208.0 Q 2654.0 1220.0 2689.0 1236.0 Q 2724.0 1252.0 2754.0 1277.0 Q 2783.0 1302.0 2801.0 1340.0 Q 2819.0 1378.0 2819.0 1432.0 L 2819.0 1432.0 Q 2819.0 1538.0 2745.0 1596.0 Q 2670.0 1654.0 2536.0 1654.0 Z" />
+            </svg>
+            <h1 id="wfHeroName" class="wf-hero-name">
+              <span class="wf-hero-line wf-hero-line-1">JIMMY</span><br />
+              <span class="wf-hero-line wf-hero-line-2">RUSS</span>
+            </h1>
+          </div>
 
-  <!-- DRONES -->
-  <div class="sectionNumber scrollReveal">03</div>
-  <div id="droneSection" class="sectionHeader scrollReveal">
-    <h2 class="sectionTitle">Drone Operations</h2>
-    <p class="sectionDescription">[ Placeholder description detailing your commercial drone services or capabilities. ]</p>
-  </div>
-  <div class="certificationBadge scrollReveal">
-    <div class="badgeIndicatorDot"></div>
-    <div class="badgeText">FAA PART 107 CERTIFIED</div>
-  </div>
-  <div class="serviceCategories scrollReveal">
-    <div class="serviceCategoryCard">
-      <div class="serviceCategoryLabel">Category 1</div>
+          <div class="wf-scroll-cue">
+            <span>PROJECTS</span>
+            <span>&darr;</span>
+          </div>
+        </section>
+
+        <!-- SELECTED PROJECTS (SIMPLE DISPLAY) -->
+        <section id="projects" class="wf-section">
+          <div class="wf-label">FEATURED PROJECTS</div>
+          <div class="wf-projects-grid">
+            <!-- Project Card 1: Kinematic Controller -->
+            <article class="wf-box wf-project-card" data-project-id="kinematic-controller">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ 16:9 INTERACTIVE DEMO INSIDE ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">Unity 6</span>
+                  <span class="wf-tag">C#</span>
+                  <span class="wf-tag">Kinematics</span>
+                </div>
+                <h2 class="wf-project-title">Kinematic Character Controller</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Short Summary Placeholder — Custom collide-and-slide movement motor eliminating physics jitter ]
+                </div>
+                <button type="button" class="wf-btn wf-btn-primary wf-view-project-btn">
+                  <span>View Project &amp; Demo</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Project Card 2: Drone Desktop -->
+            <article class="wf-box wf-project-card" data-project-id="drone-desktop">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ DESKTOP GCS &amp; TELEMETRY ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">TypeScript</span>
+                  <span class="wf-tag">Electron</span>
+                  <span class="wf-tag">React</span>
+                </div>
+                <h2 class="wf-project-title">Drone Desktop</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Short Summary Placeholder — Ground control station for flight telemetry, sensor logs, and mission planning ]
+                </div>
+                <button type="button" class="wf-btn wf-btn-primary wf-view-project-btn">
+                  <span>View Project &amp; Details</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Project Card 3: Photography Portfolio -->
+            <article class="wf-box wf-project-card" data-project-id="photography-portfolio">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ HIGH-RES VISUAL GALLERY ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">Modern Web</span>
+                  <span class="wf-tag">Canvas</span>
+                  <span class="wf-tag">EXIF Telemetry</span>
+                </div>
+                <h2 class="wf-project-title">Photography Portfolio</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Short Summary Placeholder — High-resolution imagery showcase with EXIF telemetry and responsive layouts ]
+                </div>
+                <button type="button" class="wf-btn wf-btn-primary wf-view-project-btn">
+                  <span>View Project &amp; Details</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Project Card 4: Music Studio Website -->
+            <article class="wf-box wf-project-card" data-project-id="music-studio">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ INTERACTIVE AUDIO CONSOLE ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">Web Audio API</span>
+                  <span class="wf-tag">DSP</span>
+                  <span class="wf-tag">Interactive Audio</span>
+                </div>
+                <h2 class="wf-project-title">Music Studio Website</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Short Summary Placeholder — Interactive studio environment with real-time audio playback and waveform visualization ]
+                </div>
+                <button type="button" class="wf-btn wf-btn-primary wf-view-project-btn">
+                  <span>View Project &amp; Details</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ABOUT & CAPABILITIES -->
+        <section id="about" class="wf-section">
+          <div class="wf-label">ABOUT &amp; CAPABILITIES</div>
+          <div class="wf-about-grid">
+            <div class="wf-box wf-about-box">
+              <div>
+                <h2 class="wf-project-title" style="font-size: 1.5rem; margin-bottom: 12px;">[ About Me Heading Placeholder ]</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Bio Paragraph Placeholder — your background, how you approach problem-solving, and your focus on gameplay kinematics and software architecture ]
+                </div>
+              </div>
+              <div class="wf-copy-placeholder">
+                [ Secondary Bio / Philosophy Placeholder — e.g. low-level movement, determinism, performance ]
+              </div>
+            </div>
+
+            <div class="wf-box">
+              <h2 class="wf-project-title" style="font-size: 1.5rem; margin-bottom: 16px;">[ Core Technical Stack ]</h2>
+              <div class="wf-skills-column">
+                <div>
+                  <div class="wf-label" style="margin-bottom: 8px;">[ GAMEPLAY &amp; PHYSICS ]</div>
+                  <div class="wf-tag-row">
+                    <span class="wf-tag">[ Unity 6 ]</span>
+                    <span class="wf-tag">[ C# ]</span>
+                    <span class="wf-tag">[ Kinematics &amp; Linear Algebra ]</span>
+                    <span class="wf-tag">[ Zero-GC Loops ]</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="wf-label" style="margin-bottom: 8px;">[ SYSTEMS &amp; FULL-STACK ]</div>
+                  <div class="wf-tag-row">
+                    <span class="wf-tag">[ TypeScript ]</span>
+                    <span class="wf-tag">[ React ]</span>
+                    <span class="wf-tag">[ State Machines ]</span>
+                    <span class="wf-tag">[ Modern Web &amp; Canvas ]</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="wf-label" style="margin-bottom: 8px;">[ TOOLING &amp; WORKFLOW ]</div>
+                  <div class="wf-tag-row">
+                    <span class="wf-tag">[ Git &amp; GitHub ]</span>
+                    <span class="wf-tag">[ Profiling &amp; Optimization ]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTACT & SOCIALS -->
+        <section id="contact" class="wf-section" style="border-bottom: 0;">
+          <div class="wf-label">DIRECT TRANSMISSION</div>
+          <div class="wf-box wf-contact-box">
+            <div style="flex: 1; min-width: 280px;">
+              <h2 class="wf-project-title" style="font-size: 1.75rem; margin-bottom: 8px;">[ Let’s Build Something Exceptional ]</h2>
+              <div class="wf-copy-placeholder">
+                [ Contact Call-to-Action Copy Placeholder — e.g. Open to gameplay programming, software engineering roles, and collaborations ]
+              </div>
+              <div id="copyToast" class="wf-toast" aria-live="polite"></div>
+            </div>
+
+            <div class="wf-contact-actions">
+              <button type="button" id="copyEmailBtn" class="wf-btn wf-btn-primary">
+                <span>[ Copy Email ] (thejunglejimruss@gmail.com)</span>
+              </button>
+              <a href="https://github.com/TheJungleJimRuss" target="_blank" rel="noopener noreferrer" class="wf-btn">
+                <span>[ GitHub Profile ] &nearr;</span>
+              </a>
+              <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="wf-btn">
+                <span>[ LinkedIn Profile ] &nearr;</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- MINIMAL FOOTER -->
+        <footer class="wf-site-footer">
+          <div>&copy; 2026 JIMMY RUSS // [ PORTFOLIO WIREFRAME ]</div>
+          <div>[ ALL IMPORTANT TEXT TO BE WRITTEN BY YOU ]</div>
+        </footer>
+      </main>
     </div>
-    <div class="serviceCategoryCard">
-      <div class="serviceCategoryLabel">Category 2</div>
+
+    <!-- ==================== VIEW 2: DRONE PILOT / FLIGHT OPS OVERVIEW ==================== -->
+    <div id="viewDroneOverview" hidden>
+      <main class="wf-container">
+        <!-- DRONE HERO HEADER -->
+        <section id="droneHero" class="wf-hero-section">
+          <div class="wf-hero-inner">
+            <div class="wf-tag wf-drone-badge" style="margin-bottom: 16px;">
+              FAA PART 107 CERTIFIED // REMOTE PILOT IN COMMAND
+            </div>
+            <h1 class="wf-hero-name">
+              AERIAL<br />OPS
+            </h1>
+            <div class="wf-copy-placeholder" style="max-width: 680px; margin-top: 24px;">
+              [ Commercial Drone Pilot &amp; Aerial Systems Operator — Cinematic aerial cinematography, photogrammetry terrain mapping, and mission telemetry execution ]
+            </div>
+          </div>
+
+          <div class="wf-scroll-cue">
+            <span>FLIGHT MISSIONS</span>
+            <span>&darr;</span>
+          </div>
+        </section>
+
+        <!-- AERIAL MISSIONS / FLIGHT PORTFOLIO -->
+        <section id="droneMissions" class="wf-section">
+          <div class="wf-label">COMMERCIAL FLIGHT MISSIONS &amp; DELIVERABLES</div>
+          <div class="wf-projects-grid">
+            <!-- Mission Card 1 -->
+            <article class="wf-box wf-project-card" data-drone-id="cinematic-showcase">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ 4K / 60FPS 10-BIT D-LOG SHOWCASE ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">Cinematography</span>
+                  <span class="wf-tag">D-Log M</span>
+                  <span class="wf-tag">Commercial</span>
+                </div>
+                <h2 class="wf-project-title">Commercial Aerial Showcase</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Mission Summary Placeholder — Dynamic tracking shots, architectural reveals, and color-graded 10-bit master footage ]
+                </div>
+                <div class="wf-tag-row">
+                  <span class="wf-tag">Resolution: 4K UHD</span>
+                  <span class="wf-tag">Profile: 10-Bit Log</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Mission Card 2 -->
+            <article class="wf-box wf-project-card" data-drone-id="orthomosaic-mapping">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ 3D ORTHOMOSAIC &amp; POINT CLOUD ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">Photogrammetry</span>
+                  <span class="wf-tag">Orthomosaic</span>
+                  <span class="wf-tag">Survey</span>
+                </div>
+                <h2 class="wf-project-title">3D Terrain &amp; Site Reconstruction</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Mission Summary Placeholder — Multi-grid automated flight paths generating high-density point clouds and elevation models ]
+                </div>
+                <div class="wf-tag-row">
+                  <span class="wf-tag">GSD: &lt; 1.5 cm/px</span>
+                  <span class="wf-tag">Overlap: 80/75%</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Mission Card 3 -->
+            <article class="wf-box wf-project-card" data-drone-id="precision-inspection">
+              <div class="wf-placeholder wf-project-thumb">
+                <span>[ PRECISION ASSET INSPECTION ]</span>
+              </div>
+              <div class="wf-project-content">
+                <div class="wf-tag-row" style="margin-bottom: 8px;">
+                  <span class="wf-tag">Infrastructure</span>
+                  <span class="wf-tag">Asset Inspection</span>
+                  <span class="wf-tag">Telemetry</span>
+                </div>
+                <h2 class="wf-project-title">Asset &amp; Elevation Inspection</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Mission Summary Placeholder — Close-range structural inspections, risk log logging, and geo-referenced defect mapping ]
+                </div>
+                <div class="wf-tag-row">
+                  <span class="wf-tag">Airspace: LAANC / Class D/G</span>
+                  <span class="wf-tag">Safety: 100% Verified</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- DRONE FLEET & TECHNICAL SPECIFICATIONS -->
+        <section id="droneSpecs" class="wf-section">
+          <div class="wf-label">AIRFRAME FLEET &amp; OPERATIONAL SPECS</div>
+          <div class="wf-about-grid">
+            <div class="wf-box wf-about-box">
+              <div>
+                <h2 class="wf-project-title" style="font-size: 1.5rem; margin-bottom: 12px;">[ Flight Operations &amp; Standards ]</h2>
+                <div class="wf-copy-placeholder" style="margin-bottom: 16px;">
+                  [ Operating Standards Placeholder — Strict FAA Part 107 compliance, pre-flight airspace authorization via LAANC, risk assessment protocols, and redundant battery safety management ]
+                </div>
+              </div>
+              <div class="wf-tag-row">
+                <span class="wf-tag">FAA Part 107 Licensed</span>
+                <span class="wf-tag">Night Operations Compliant</span>
+                <span class="wf-tag">Airspace Authorization (LAANC)</span>
+              </div>
+            </div>
+
+            <div class="wf-box">
+              <h2 class="wf-project-title" style="font-size: 1.5rem; margin-bottom: 16px;">[ Fleet &amp; Sensor Systems ]</h2>
+              <div class="wf-skills-column">
+                <div>
+                  <div class="wf-label" style="margin-bottom: 8px;">[ PRIMARY AIRFRAMES ]</div>
+                  <div class="wf-tag-row">
+                    <span class="wf-tag">[ 4K / 60FPS Camera Drone ]</span>
+                    <span class="wf-tag">[ Sub-249g Lightweight Fleet ]</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="wf-label" style="margin-bottom: 8px;">[ SOFTWARE &amp; PIPELINES ]</div>
+                  <div class="wf-tag-row">
+                    <span class="wf-tag">[ DJI Fly / Pilot 2 ]</span>
+                    <span class="wf-tag">[ WebODM / Photogrammetry ]</span>
+                    <span class="wf-tag">[ DaVinci Resolve Studio ]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DRONE CONTACT TRANSMISSION -->
+        <section id="droneContact" class="wf-section" style="border-bottom: 0;">
+          <div class="wf-label">FLIGHT COMMISSIONS &amp; CONTACT</div>
+          <div class="wf-box wf-contact-box">
+            <div style="flex: 1; min-width: 280px;">
+              <h2 class="wf-project-title" style="font-size: 1.75rem; margin-bottom: 8px;">[ Book an Aerial Mission ]</h2>
+              <div class="wf-copy-placeholder">
+                [ Mission Booking Call-to-Action — Available for commercial aerial video, construction site mapping, and precision inspection commissions ]
+              </div>
+            </div>
+            <div class="wf-contact-actions">
+              <button type="button" id="droneCopyEmailBtn" class="wf-btn wf-btn-primary">
+                <span>[ Inquire for Flight ] (thejunglejimruss@gmail.com)</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- MINIMAL FOOTER -->
+        <footer class="wf-site-footer">
+          <div>&copy; 2026 JIMMY RUSS // [ AERIAL FLIGHT OPS WIREFRAME ]</div>
+          <div>[ FAA PART 107 COMMERCIAL REMOTE PILOT ]</div>
+        </footer>
+      </main>
     </div>
-    <div class="serviceCategoryCard">
-      <div class="serviceCategoryLabel">Category 3</div>
+
+    <!-- ==================== VIEW 3: DEDICATED PROJECT DETAIL PAGE (DEEP DIVE) ==================== -->
+    <div id="viewDetail" hidden>
+      <main class="wf-container wf-detail-view">
+        <nav class="wf-detail-nav" aria-label="Project Navigation">
+          <button type="button" id="backToOverviewBtn" class="wf-btn">
+            <span aria-hidden="true">&larr;</span>
+            <span>Back to Projects</span>
+          </button>
+          <span id="detailBadge" class="wf-tag">CATEGORY</span>
+        </nav>
+
+        <header class="wf-detail-header">
+          <h1 id="detailTitle" class="wf-detail-title" tabindex="-1">[ Project Title ]</h1>
+          <div id="detailSummary" class="wf-copy-placeholder" style="max-width: 760px;">
+            [ Project Deep-Dive Summary Placeholder — written by you ]
+          </div>
+        </header>
+
+        <!-- Interactive Stage / Full 16:9 Viewport -->
+        <section class="wf-section" style="padding-top: 0;">
+          <div class="wf-label">INTERACTIVE STAGE</div>
+          <div class="wf-demo-layout">
+            <div id="detailViewport" class="wf-placeholder wf-demo-viewport">
+              <strong>[ 16:9 INTERACTIVE PROJECT STAGE ]</strong>
+              <span id="detailViewportHint">[ Interactive Canvas / Media Viewport ]</span>
+            </div>
+
+            <div class="wf-demo-meta-bar">
+              <div id="detailControlsHint" class="wf-copy-placeholder" style="padding: 6px 12px; margin: 0;">
+                [ Controls / Interaction Notes Placeholder ]
+              </div>
+              <ul class="wf-spec-list" id="detailSpecList">
+                <li><span>[ Spec 01 ]</span> <span>[ Value ]</span></li>
+                <li><span>[ Spec 02 ]</span> <span>[ Value ]</span></li>
+                <li><span>[ Spec 03 ]</span> <span>[ Value ]</span></li>
+              </ul>
+              <a id="detailRepoLink" href="#" target="_blank" rel="noopener noreferrer" class="wf-btn wf-btn-primary">
+                <span>View Source on GitHub</span>
+                <span aria-hidden="true">&nearr;</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Deep Dive Documentation & Specs -->
+        <section class="wf-section" style="border-bottom: 0;">
+          <div class="wf-label">ARCHITECTURE &amp; WRITEUP</div>
+          <div class="wf-detail-grid">
+            <div class="wf-box">
+              <h2 class="wf-section-title" style="font-size: 1.35rem;">[ Engineering Deep Dive ]</h2>
+              <div class="wf-copy-placeholder" style="margin-bottom: 14px;">
+                [ Detailed Technical Writeup Placeholder — algorithms, problem breakdown, architectural decisions ]
+              </div>
+            </div>
+            <div class="wf-box">
+              <h2 class="wf-section-title" style="font-size: 1.35rem;">[ Key Constraints &amp; Solvers ]</h2>
+              <div class="wf-copy-placeholder">
+                [ Physics / Logic Constraints Placeholder — slope limits, collision normal equations, memory allocation notes ]
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
-    <div class="serviceCategoryCard">
-      <div class="serviceCategoryLabel">Category 4</div>
-    </div>
-  </div>
-  
-  <h3 class="sectionSubtitle scrollReveal">Gear</h3>
-  <div class="equipmentList scrollReveal">
-    <div class="equipmentPill">Equipment 1</div>
-    <div class="equipmentPill">Equipment 2</div>
-    <div class="equipmentPill">Equipment 3</div>
-    <div class="equipmentPill">Equipment 4</div>
-  </div>
 
-  <!-- ABOUT -->
-  <div class="sectionNumber scrollReveal">04</div>
-  <div id="aboutSection" class="aboutSection scrollReveal">
-    <div class="aboutTextContent">
-      <h2 class="sectionTitle">[ Catchy Header Statement ]</h2>
-      <p>[ Paragraph 1: Placeholder text for your primary background, personal story, or professional journey. Write a few sentences here about what you do. ]</p>
-      <p>[ Paragraph 2: Placeholder text for a secondary detail, such as your location, hobbies, or what you are currently learning. ]</p>
-    </div>
-  </div>
-
-  <!-- CONTACT -->
-  <div class="sectionNumber scrollReveal">05</div>
-  <div id="contactSection" class="contactSection scrollReveal">
-    <div class="contactTitle">[ Call to Action Header ]</div>
-    <!-- Note: CSS variable updated to camelCase here -->
-    <p style="color:var(--textMuted);">[ Brief sub-text regarding your availability or preferred contact method. ]</p>
-    <div class="contactLinks">
-      <a href="#">Email</a>
-      <a href="#">LinkedIn</a>
-      <a href="#">GitHub</a>
-    </div>
-  </div>
-
-  <div class="footerSection scrollReveal">
-    &copy; 2026 JIMMY RUSS.
-  </div>
-
-</div>
-
-<script>
-  // Mouse Tracker
-  window.addEventListener('mousemove', (mouseEvent) => {
-    document.documentElement.style.setProperty('--mouseX', mouseEvent.clientX + 'px');
-    document.documentElement.style.setProperty('--mouseY', mouseEvent.clientY + 'px');
-  });
-  
-  // Parallax Scroll
-  window.addEventListener('scroll', () => {
-    const parallaxValue = window.scrollY * -0.4;
-    document.documentElement.style.setProperty('--scrollY', parallaxValue + 'px');
-  });
-
-  // Scroll Reveal Observer
-  const intersectionObserver = new IntersectionObserver((intersectionEntries) => {
-    intersectionEntries.forEach(intersectionEntry => {
-      if (intersectionEntry.isIntersecting) {
-        intersectionEntry.target.classList.add('visible');
-      } else {
-        intersectionEntry.target.classList.remove('visible');
-      }
-    });
-  }, { threshold: 0.1 }); 
-
-  document.querySelectorAll('.scrollReveal').forEach(element => intersectionObserver.observe(element));
-</script>
-
-</body>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

@@ -1,0 +1,24 @@
+{
+  "name": "jimmy-russ-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.170.0",
+    "opentype.js": "^2.0.0",
+    "paper": "^0.17.0",
+    "polygon-clipping": "^0.15.7",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vitest": "^5.0.5"
+  }
+}
