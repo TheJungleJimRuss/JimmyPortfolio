@@ -7,7 +7,7 @@
   --color-phosphor-green: #00ff41;
   --color-phosphor-dim: rgba(0, 255, 65, 0.2);
   --color-phosphor-glow: rgba(0, 255, 65, 0.85);
-  --color-intro-bg: #050505;
+  --color-intro-bg: #000000;
 }
 
 /* Fullscreen terminal overlay on Dev enter */

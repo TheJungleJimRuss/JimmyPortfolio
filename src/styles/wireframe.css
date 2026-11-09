@@ -9,7 +9,7 @@
 }
 
 :root {
-  --bg-page: #111318;
+  --bg-page: #000000;
   --bg-box: #181b22;
   --bg-slot: #13161c;
   --border-wire: #2e3440;
@@ -25,7 +25,7 @@
 
   color-scheme: dark;
   accent-color: var(--accent-wire);
-  scrollbar-color: #2e3440 #111318;
+  scrollbar-color: #2e3440 #000000;
   scrollbar-width: thin;
 }
 
@@ -38,7 +38,7 @@
     background: #2e3440;
   }
   ::-webkit-scrollbar-track {
-    background: #111318;
+    background: #000000;
   }
 }
 
@@ -54,6 +54,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--bg-page);
 }
 
 body {
