@@ -60,7 +60,7 @@ export class HeroOutlineTracer {
     });
   }
 
-  public async startTrace(durationMs = 2800): Promise<void> {
+  public async startTrace(durationMs = 3000): Promise<void> {
     if (!this.svg || !this.paths.length) {
       this.completeImmediately();
       return;
@@ -73,13 +73,17 @@ export class HeroOutlineTracer {
     this.svg.classList.remove('is-fading-out');
     this.svg.classList.add('is-active');
 
-    const stagger = this.paths.length > 1 ? Math.floor((durationMs * 0.6) / (this.paths.length - 1)) : 100;
-    const letterDuration = Math.max(300, Math.floor(durationMs * 0.45));
+    // Minimal delay between letters so drawing cascades fluidly without noticeable pause
+    const stagger = this.paths.length > 1
+      ? Math.max(50, Math.min(85, Math.floor((durationMs * 0.2) / (this.paths.length - 1))))
+      : 80;
+    // Give each letter a longer, deliberate draw duration so the tracing motion is clearly visible
+    const letterDuration = Math.max(1200, durationMs - (this.paths.length - 1) * stagger);
 
     this.paths.forEach((path, index) => {
       const timer = setTimeout(() => {
         path.style.opacity = '1';
-        path.style.transition = `stroke-dashoffset ${letterDuration}ms cubic-bezier(0.2, 0.9, 0.3, 1)`;
+        path.style.transition = `stroke-dashoffset ${letterDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
         path.style.strokeDashoffset = '0';
         tactileAudio.playTick(1350);
       }, index * stagger);
