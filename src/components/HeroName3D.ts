@@ -29,13 +29,18 @@ export class HeroName3D {
     if (!canvas || typeof window === 'undefined') return;
 
     try {
-      container.classList.add('has-3d');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      if (!gl) return;
+
       this.scene = new THREE.Scene();
       const width = canvas.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 800);
       const height = canvas.clientHeight || 200;
       const aspect = Math.max(0.5, width / height);
       this.camera = new THREE.PerspectiveCamera(38, aspect, 0.1, 100);
       this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      if (!this.renderer.getContext()) return;
+
+      container.classList.add('has-3d');
       this.renderer.setSize(width, height, false);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
@@ -80,7 +85,7 @@ export class HeroName3D {
 
       this.startRenderLoop();
     } catch {
-      // Fallback to DOM rendering if WebGL is unavailable
+      container.classList.remove('has-3d');
     }
   }
 

@@ -256,6 +256,7 @@
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: -0.01em;
+  text-decoration: none;
   color: #8c96a5;
   transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
