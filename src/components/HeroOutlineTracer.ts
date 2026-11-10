@@ -93,30 +93,25 @@ export class HeroOutlineTracer {
     const totalAnimTime = (this.paths.length - 1) * stagger + letterDuration;
 
     return new Promise<void>((resolve) => {
-      // 1. Materialize solid hero text right as tracing finishes
-      const materializeTimer = setTimeout(() => {
+      // 1. Immediately cross-fade: materialize solid hero text and fade out trace SVG as writing finishes
+      const switchTimer = setTimeout(() => {
         if (this.heroElement) {
           this.heroElement.classList.remove('is-pending-intro');
           this.heroElement.classList.add('is-materialized');
         }
-      }, totalAnimTime);
-      this.activeTimers.push(materializeTimer);
-
-      // 2. Smoothly fade out SVG trace overlay after text begins materializing
-      const fadeTimer = setTimeout(() => {
         if (this.svg) {
           this.svg.classList.add('is-fading-out');
         }
-      }, totalAnimTime + 400);
-      this.activeTimers.push(fadeTimer);
+      }, totalAnimTime);
+      this.activeTimers.push(switchTimer);
 
-      // 3. Resolve and complete
+      // 2. Resolve immediately as soon as cross-fade settles (350ms)
       const finishTimer = setTimeout(() => {
         if (this.svg) {
           this.svg.classList.remove('is-active');
         }
         resolve();
-      }, totalAnimTime + 1600);
+      }, totalAnimTime + 350);
       this.activeTimers.push(finishTimer);
     });
   }
