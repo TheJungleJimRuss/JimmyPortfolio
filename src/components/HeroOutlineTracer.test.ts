@@ -56,8 +56,8 @@ describe('HeroOutlineTracer', () => {
 
     expect(mockHeroElement.classList.contains('is-pending-intro')).toBe(true);
     expect(mockHeroElement.classList.contains('is-materialized')).toBe(false);
-    expect(mockPath1.style.strokeDasharray).toBe('420 420');
-    expect(mockPath1.style.strokeDashoffset).toBe('420');
+    expect(mockPath1.style.strokeDasharray).toBe('400 400');
+    expect(mockPath1.style.strokeDashoffset).toBe('400');
   });
 
   it('falls back to precomputed path length when getTotalLength returns 0', () => {
@@ -65,9 +65,9 @@ describe('HeroOutlineTracer', () => {
     const tracer = new HeroOutlineTracer();
     tracer.init(mockSvg, mockHeroElement);
 
-    // Known length for index 0 is 3007, safe length is Math.ceil(3007 * 1.05) = 3158
-    expect(mockPath1.style.strokeDasharray).toBe('3158 3158');
-    expect(mockPath1.style.strokeDashoffset).toBe('3158');
+    // Known length for index 0 is 3007
+    expect(mockPath1.style.strokeDasharray).toBe('3007 3007');
+    expect(mockPath1.style.strokeDashoffset).toBe('3007');
   });
 
   it('draws path contours and transitions hero to is-materialized when complete', async () => {

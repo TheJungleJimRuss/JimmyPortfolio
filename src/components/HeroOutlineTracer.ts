@@ -51,7 +51,7 @@ export class HeroOutlineTracer {
         length = KNOWN_PATH_LENGTHS[index] || 800;
       }
 
-      const safeLength = Math.ceil(length * 1.05);
+      const safeLength = Math.ceil(length);
       path.style.strokeDasharray = `${safeLength} ${safeLength}`;
       path.style.strokeDashoffset = `${safeLength}`;
       path.style.transition = 'none';
@@ -60,7 +60,7 @@ export class HeroOutlineTracer {
     });
   }
 
-  public async startTrace(durationMs = 3000): Promise<void> {
+  public async startTrace(durationMs = 2280): Promise<void> {
     if (!this.svg || !this.paths.length) {
       this.completeImmediately();
       return;
@@ -73,17 +73,15 @@ export class HeroOutlineTracer {
     this.svg.classList.remove('is-fading-out');
     this.svg.classList.add('is-active');
 
-    // Minimal delay between letters so drawing cascades fluidly without noticeable pause
-    const stagger = this.paths.length > 1
-      ? Math.max(50, Math.min(85, Math.floor((durationMs * 0.2) / (this.paths.length - 1))))
-      : 80;
-    // Give each letter a longer, deliberate draw duration so the tracing motion is clearly visible
+    // Cascade letters smoothly with a brisk 60ms stagger
+    const stagger = 60;
+    // Each letter traces at a steady constant speed so strokes actively move right up to completion
     const letterDuration = Math.max(1200, durationMs - (this.paths.length - 1) * stagger);
 
     this.paths.forEach((path, index) => {
       const timer = setTimeout(() => {
         path.style.opacity = '1';
-        path.style.transition = `stroke-dashoffset ${letterDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
+        path.style.transition = `stroke-dashoffset ${letterDuration}ms linear`;
         path.style.strokeDashoffset = '0';
         tactileAudio.playTick(1350);
       }, index * stagger);
@@ -93,7 +91,7 @@ export class HeroOutlineTracer {
     const totalAnimTime = (this.paths.length - 1) * stagger + letterDuration;
 
     return new Promise<void>((resolve) => {
-      // 1. Immediately cross-fade: materialize solid hero text and fade out trace SVG as writing finishes
+      // The exact moment the final letter's stroke closes, immediately cross-fade to solid text
       const switchTimer = setTimeout(() => {
         if (this.heroElement) {
           this.heroElement.classList.remove('is-pending-intro');
@@ -105,13 +103,13 @@ export class HeroOutlineTracer {
       }, totalAnimTime);
       this.activeTimers.push(switchTimer);
 
-      // 2. Resolve immediately as soon as cross-fade settles (350ms)
+      // Resolve as soon as the cross-fade finishes (250ms)
       const finishTimer = setTimeout(() => {
         if (this.svg) {
           this.svg.classList.remove('is-active');
         }
         resolve();
-      }, totalAnimTime + 350);
+      }, totalAnimTime + 250);
       this.activeTimers.push(finishTimer);
     });
   }
