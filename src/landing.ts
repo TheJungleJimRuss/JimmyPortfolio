@@ -49,13 +49,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  window.addEventListener('pointermove', (e) => {
+    const normX = (e.clientX / window.innerWidth) * 2 - 1;
+    const normY = (e.clientY / window.innerHeight) * 2 - 1;
+    heroNameHero.updatePointerTilt(normX, normY);
+    heroName3d.updatePointer(normX, normY);
+  });
+
+  window.addEventListener('pointerleave', () => {
+    heroNameHero.updatePointerTilt(0, 0);
+    heroName3d.updatePointer(0, 0);
+  });
+
+  function navigateToDev() {
+    tactileAudio.playImpulse();
+    if (viewGateway) {
+      viewGateway.classList.add('page-is-exiting');
+    }
+    setTimeout(() => {
+      window.location.href = './dev.html';
+    }, 160);
+  }
+
   if (viewGateway) {
     gatewayController.mount(viewGateway, {
       initialAudioEnabled: tactileAudio.isEnabled(),
-      onLaunchDev: () => {
-        tactileAudio.playImpulse();
-        window.location.href = './dev.html';
-      },
+      onLaunchDev: navigateToDev,
       onLaunchDrone: () => {
         tactileAudio.playImpulse();
       },
@@ -73,8 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     gatewayDevBtn?.addEventListener('click', (e) => {
       e.preventDefault();
-      tactileAudio.playImpulse();
-      window.location.href = './dev.html';
+      navigateToDev();
     });
 
     gatewayDroneBtn?.addEventListener('mouseenter', () => {

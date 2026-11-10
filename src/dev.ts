@@ -83,7 +83,41 @@ const projectDetails: Record<string, ProjectDetailData> = {
 projectDetails['telemetry-ops-app'] = projectDetails['drone-desktop'];
 projectDetails['spatial-media-engine'] = projectDetails['photography-portfolio'];
 
+// Enforce manual scroll restoration so reloading always starts at the initial hero viewport
+if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+function resetToInitialViewport(): void {
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
+}
+
+// Reset immediately on script evaluation
+resetToInitialViewport();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pageshow', () => {
+    resetToInitialViewport();
+  });
+  window.addEventListener('beforeunload', () => {
+    resetToInitialViewport();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  resetToInitialViewport();
+
+  const navGatewayBtn = document.getElementById('navGatewayBtn');
+  navGatewayBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.body.classList.add('page-is-exiting');
+    setTimeout(() => {
+      window.location.href = './index.html';
+    }, 160);
+  });
+
   const viewOverview = document.getElementById('viewOverview');
   const viewDetail = document.getElementById('viewDetail');
   const backBtn = document.getElementById('backToOverviewBtn');

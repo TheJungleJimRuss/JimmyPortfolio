@@ -29,8 +29,13 @@ export class HeroName3D {
     if (!canvas || typeof window === 'undefined') return;
 
     try {
-      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-      if (!gl) return;
+      const testCanvas = document.createElement('canvas');
+      const hasWebGL = Boolean(
+        typeof window !== 'undefined' &&
+        window.WebGLRenderingContext &&
+        (testCanvas.getContext('webgl2') || testCanvas.getContext('webgl'))
+      );
+      if (!hasWebGL) return;
 
       this.scene = new THREE.Scene();
       const width = canvas.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 800);
