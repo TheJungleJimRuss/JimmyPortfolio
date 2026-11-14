@@ -5,6 +5,9 @@ import './styles/intro-trace.css';
 import './styles/desktop.css';
 
 import { DesktopController } from './components/DesktopController';
+import { createFileExplorer } from './components/FileExplorerView';
+import { createProjectWindow } from './components/ProjectWindowView';
+import { slugFromWindowId } from './components/ProjectModel';
 import { IntroSequenceController } from './components/IntroSequenceController';
 import { createViewportLayoutAdapter } from './components/ViewportLayoutAdapter';
 
@@ -55,7 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const desktop = new DesktopController(
     { root, surface, icons, taskbarButtons, clock, live },
-    { content: { hero: heroInner } },
+    {
+      content: { hero: heroInner },
+      contentFor(id, dispatch) {
+        if (id === 'projects') return createFileExplorer(dispatch);
+        const slug = slugFromWindowId(id);
+        return slug === null ? null : createProjectWindow(slug);
+      },
+    },
   );
   desktop.mount();
   heroSource?.remove();

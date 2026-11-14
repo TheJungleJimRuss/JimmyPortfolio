@@ -228,6 +228,322 @@ body {
   max-width: none;
 }
 
+/* ---------- File Explorer and Project windows ---------- */
+.desk-body:has(> .fx),
+.desk-body:has(> .pw) {
+  display: block;
+  place-items: stretch;
+}
+
+.fx {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+}
+
+.fx-sidebar {
+  border-right: 1px solid var(--desk-green-dim);
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.fx-sidebar-list,
+.fx-rows,
+.fx-crumbs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fx-side-btn,
+.fx-row {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--desk-green-mid);
+  font: 500 0.75rem/1.2 var(--desk-font);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.fx-side-btn svg,
+.fx-row svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.fx-side-btn:hover,
+.fx-row:hover {
+  background: var(--desk-green-faint);
+  color: var(--desk-green);
+}
+
+.fx-side-btn[aria-current='page'] {
+  color: var(--desk-green);
+  background: var(--desk-green-faint);
+  box-shadow: inset 2px 0 0 var(--desk-green);
+}
+
+.fx-side-btn:focus-visible,
+.fx-row:focus-visible,
+.pw-link:focus-visible {
+  outline: 2px solid var(--desk-green);
+  outline-offset: -2px;
+}
+
+.fx-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fx-crumbs {
+  flex: none;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--desk-green-dim);
+  font: 500 0.72rem/1 var(--desk-font);
+  letter-spacing: 0.06em;
+  color: var(--desk-green-mid);
+}
+
+.fx-crumbs ol {
+  display: flex;
+  gap: 8px;
+}
+
+.fx-crumbs li + li::before {
+  content: '/';
+  margin-right: 8px;
+  color: var(--desk-green-dim);
+}
+
+.fx-crumbs li[aria-current='page'] {
+  color: var(--desk-green);
+}
+
+.fx-rows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.fx-rows li + li {
+  border-top: 1px solid var(--desk-green-faint);
+}
+
+.fx-row {
+  color: var(--desk-text);
+  min-height: 52px;
+}
+
+.fx-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fx-badge {
+  flex: none;
+  padding: 3px 8px;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green-mid);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Narrow explorer (phone, small windows): the sidebar becomes a strip above the list. */
+@container (max-width: 459px) {
+  .fx {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .fx-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--desk-green-dim);
+    padding: 0;
+    overflow: visible;
+  }
+  .fx-sidebar-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .fx-side-btn {
+    justify-content: center;
+    gap: 6px;
+    padding: 0 6px;
+  }
+  .fx-side-btn[aria-current='page'] {
+    box-shadow: inset 0 -2px 0 var(--desk-green);
+  }
+}
+
+.pw {
+  min-height: 100%;
+}
+
+.pw-stage {
+  aspect-ratio: 16 / 9;
+  /* Never taller than 60% of the window body, so the slot column stays reachable when maximized. */
+  width: min(100%, calc(60cqh * 16 / 9));
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--desk-green-dim);
+  background: repeating-linear-gradient(135deg, transparent 0 11px, var(--desk-green-faint) 11px 12px);
+  color: var(--desk-green-mid);
+  font-size: 0.8rem;
+}
+
+.pw-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.pw-slot {
+  margin: 0;
+  max-width: 100%;
+}
+
+.pw-controls {
+  color: var(--desk-green-mid);
+  font-size: 0.72rem;
+}
+
+.pw-badge,
+.pw-tag {
+  padding: 3px 8px;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green-mid);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pw-title {
+  font: 600 1.15rem/1.25 var(--desk-font);
+  color: var(--desk-green);
+}
+
+.pw-tags,
+.pw-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pw-summary,
+.pw-deep-dive,
+.pw-challenges {
+  color: var(--desk-text);
+}
+
+.pw-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green);
+  text-decoration: none;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+}
+
+a.pw-link:hover {
+  background: var(--desk-green);
+  color: #000;
+}
+
+.pw-link.is-pending {
+  border-right: 0;
+  padding-right: 0;
+  color: var(--desk-green-mid);
+  white-space: pre;
+}
+
+.pw-link.is-pending + .pw-marker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px 0 0;
+  border: 1px solid var(--desk-green-dim);
+  border-left: 0;
+  color: var(--desk-green-mid);
+  font-size: 0.74rem;
+}
+
+.pw-specs {
+  width: 100%;
+  border-top: 1px solid var(--desk-green-dim);
+}
+
+.pw-spec {
+  display: grid;
+  grid-template-columns: minmax(80px, 30%) minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--desk-green-faint);
+}
+
+.pw-spec dt {
+  color: var(--desk-green-mid);
+}
+
+.pw-spec dd {
+  margin: 0;
+}
+
+.pw-heading {
+  margin: 0 0 8px;
+  font: 600 0.9rem/1.3 var(--desk-font);
+  color: var(--desk-green);
+}
+
+.pw-deep-dive p,
+.pw-challenges p,
+.pw-deep-dive ul,
+.pw-challenges ul {
+  margin: 0 0 10px;
+}
+
+.pw-code {
+  padding: 1px 4px;
+  border: 1px solid var(--desk-green-faint);
+  font-family: var(--desk-font);
+  font-size: 0.9em;
+  color: var(--desk-green);
+}
+
+.pw-pre {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--desk-green-dim);
+  font-size: 0.76rem;
+}
+
+.pw-pre .pw-code {
+  border: 0;
+  padding: 0;
+}
+
 /* ---------- Taskbar ---------- */
 .taskbar {
   position: absolute;
@@ -364,12 +680,14 @@ body {
   .desktop[data-layout='phone'] .taskbar-buttons {
     order: -1;
     flex: 0 0 100%;
+    /* One row however many windows are open (the four main ones plus any Project window). */
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     overflow: visible;
   }
   .desktop[data-layout='phone'] .taskbar-btn {
-    justify-content: center;
+    justify-content: safe center;
     padding: 0 4px;
   }
   .desktop[data-layout='phone'] .taskbar-clock {

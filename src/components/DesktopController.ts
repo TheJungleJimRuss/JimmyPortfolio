@@ -21,6 +21,8 @@ export interface DesktopElements {
 export interface DesktopOptions {
   /** Content nodes for windows that have real content yet; others show a framed `[ ... ]` slot. */
   content?: Partial<Record<WindowId, HTMLElement>>;
+  /** Builds content for a window when it is first created (used for Project windows); `null` keeps the slot. */
+  contentFor?: (id: WindowId, dispatch: (action: DesktopAction) => void) => HTMLElement | null;
 }
 
 const MAIN_WINDOWS: WindowId[] = ['hero', 'projects', 'about', 'contact'];
@@ -177,7 +179,7 @@ export class DesktopController {
 
     const body = document.createElement('div');
     body.className = 'desk-body';
-    const content = this.options.content?.[id];
+    const content = this.options.content?.[id] ?? this.options.contentFor?.(id, (a) => this.dispatch(a));
     if (content) {
       body.append(content);
     } else {
