@@ -142,6 +142,26 @@ export interface StageLink {
   url: string;
 }
 
+/** Fixed chrome labels for the keyboard hint. */
+export const KEYBOARD_HINT = { game: 'Keyboard: game', desktop: 'Keyboard: desktop' } as const;
+export type KeyboardOwner = keyof typeof KEYBOARD_HINT;
+
+/** The game owns the keyboard only while the stage iframe is the focused element. */
+export function keyboardOwner(stageFrameFocused: boolean): KeyboardOwner {
+  return stageFrameFocused ? 'game' : 'desktop';
+}
+
+/** What the browser and the host allow, as far as the stage can tell. Defaults are the optimistic case. */
+export interface StageEnv {
+  webgl2: boolean;
+  /** The build failed to load or the host failed the size/compression rule: use the video. */
+  buildFailed: boolean;
+}
+
+export const DEFAULT_STAGE_ENV: StageEnv = { webgl2: true, buildFailed: false };
+
+export type VideoReason = 'phone' | 'no-webgl2' | 'build-unavailable';
+
 /** What the stage area renders. Pure: the reducer owns the lifecycle, this only maps it to a view. */
 export type StageView =
   | {
@@ -154,13 +174,31 @@ export type StageView =
       link: StageLink | null;
     }
   | { kind: 'iframe'; url: string; link: StageLink }
+  /** Unity build in a same-origin iframe; `buildPath` is relative to the site base. */
+  | { kind: 'unity'; buildPath: string; maxBuildMB: number }
+  /** Gameplay video slot. `videoUrl` null = no source yet: only the `[ ... ]` slot shows. */
+  | { kind: 'video'; videoUrl: string | null; reason: VideoReason }
   /** Minimized after loading: the iframe is removed (resume reloads it on restore). */
   | { kind: 'paused' }
   | { kind: 'in-progress' };
 
-export function stageView(stage: StageSpec, state: StageState | undefined, layout: DesktopLayout): StageView {
+export function stageView(
+  stage: StageSpec,
+  state: StageState | undefined,
+  layout: DesktopLayout,
+  env: StageEnv = DEFAULT_STAGE_ENV,
+): StageView {
   if (stage.medium === 'in-progress') return { kind: 'in-progress' };
-  if (stage.medium === 'unity-webgl') return { kind: 'poster', canLoad: false, comingSoon: true, link: null };
+  if (stage.medium === 'unity-webgl') {
+    const videoUrl = present(stage.videoUrl) ? stage.videoUrl.trim() : null;
+    if (layout === 'phone') return { kind: 'video', videoUrl, reason: 'phone' };
+    if (!env.webgl2) return { kind: 'video', videoUrl, reason: 'no-webgl2' };
+    if (!present(stage.buildPath)) return { kind: 'poster', canLoad: false, comingSoon: true, link: null };
+    if (state === 'loaded' && env.buildFailed) return { kind: 'video', videoUrl, reason: 'build-unavailable' };
+    if (state === 'loaded') return { kind: 'unity', buildPath: stage.buildPath.trim(), maxBuildMB: stage.maxBuildMB };
+    if (state === 'paused') return { kind: 'paused' };
+    return { kind: 'poster', canLoad: true, comingSoon: false, link: null };
+  }
   if (layout === 'phone') {
     return { kind: 'poster', canLoad: false, comingSoon: false, link: { label: STAGE_LINK_LABELS.open, url: stage.url } };
   }

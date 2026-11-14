@@ -1,6 +1,16 @@
 import type { Inline, ProjectEntry, WriteUp, WriteUpBlock } from '../data/projects';
 import type { DesktopAction, DesktopState } from './DesktopState';
-import { findProject, stageView, visibleSlots, type SlotView, type StageLink, type StageView } from './ProjectModel';
+import { hasWebGL2, probeBuild, resolveBuildUrl } from './KccBuild';
+import {
+  findProject,
+  KEYBOARD_HINT,
+  keyboardOwner,
+  stageView,
+  visibleSlots,
+  type SlotView,
+  type StageLink,
+  type StageView,
+} from './ProjectModel';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
@@ -102,6 +112,10 @@ export interface ProjectWindowHandle {
   update(state: DesktopState): void;
 }
 
+interface StageHooks {
+  mountUnity(frame: HTMLElement, view: Extract<StageView, { kind: 'unity' }>): void;
+}
+
 /** Trusted sites only (our own GitHub Pages). allow-same-origin keeps their storage and relative fetches working
  *  inside their own cross-origin frame; it does not touch this page. No top-navigation, downloads or modals. */
 const SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-forms';
@@ -114,7 +128,7 @@ function stageLink(link: StageLink): HTMLAnchorElement {
   return a;
 }
 
-function stageNode(project: ProjectEntry, view: StageView, dispatch: (a: DesktopAction) => void): HTMLElement {
+function stageNode(project: ProjectEntry, view: StageView, dispatch: (a: DesktopAction) => void, hooks: StageHooks): HTMLElement {
   const frame = el('div', 'pw-stage');
   frame.tabIndex = -1;
   frame.setAttribute('role', 'group');
@@ -129,6 +143,23 @@ function stageNode(project: ProjectEntry, view: StageView, dispatch: (a: Desktop
       f.setAttribute('sandbox', SANDBOX);
       f.src = view.url;
       frame.append(f);
+      break;
+    }
+    case 'unity':
+      hooks.mountUnity(frame, view);
+      break;
+    case 'video': {
+      if (view.videoUrl) {
+        const v = el('video', 'pw-video');
+        v.controls = true;
+        v.playsInline = true;
+        v.preload = 'none';
+        v.setAttribute('aria-label', `${project.name} gameplay video`);
+        v.src = view.videoUrl;
+        frame.append(v);
+      } else {
+        frame.append(el('span', 'pw-stage-marker', '[ ... ]'));
+      }
       break;
     }
     case 'poster': {
@@ -172,14 +203,106 @@ export function createProjectWindow(slug: string, dispatch: (a: DesktopAction) =
   root.append(stageBox, column);
 
   let shown = '';
+  let lastState: DesktopState | null = null;
+  let buildFailed = false;
+  let teardown: (() => void) | null = null;
+  let pendingHint: HTMLElement | null = null;
+
+  /** Same-origin Unity iframe: probe the host first, hand the keyboard back on Esc or any outside click. */
+  const mountUnity: StageHooks['mountUnity'] = (frame, view) => {
+    const pageUrl = resolveBuildUrl(view.buildPath, import.meta.env.BASE_URL, document.baseURI);
+    const hint = el('p', 'pw-kbd', KEYBOARD_HINT.desktop);
+    hint.setAttribute('aria-hidden', 'true');
+    frame.append(el('span', 'pw-stage-marker', '[ ... ]'));
+    pendingHint = hint;
+    let iframe: HTMLIFrameElement | null = null;
+    let alive = true;
+
+    const sync = () => {
+      const owner = keyboardOwner(!!iframe && document.activeElement === iframe);
+      hint.textContent = KEYBOARD_HINT[owner];
+      frame.dataset.keyboard = owner;
+    };
+    const release = () => {
+      iframe?.blur();
+      frame.closest<HTMLElement>('.desk-window')?.focus({ preventScroll: true });
+      sync();
+    };
+    const fail = () => {
+      if (!alive || buildFailed) return;
+      buildFailed = true;
+      refresh();
+    };
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin === location.origin && e.source === iframe?.contentWindow && e.data?.type === 'kcc:error') fail();
+    };
+    const later = () => setTimeout(sync, 0);
+    window.addEventListener('message', onMessage);
+    window.addEventListener('blur', later);
+    window.addEventListener('focus', later);
+    document.addEventListener('focusin', later);
+    document.addEventListener('pointerdown', later, true);
+    teardown = () => {
+      alive = false;
+      window.removeEventListener('message', onMessage);
+      window.removeEventListener('blur', later);
+      window.removeEventListener('focus', later);
+      document.removeEventListener('focusin', later);
+      document.removeEventListener('pointerdown', later, true);
+    };
+
+    void probeBuild(pageUrl, view.maxBuildMB).then((verdict) => {
+      if (!alive) return;
+      if (!verdict.ok) return fail();
+      const f = el('iframe', 'pw-frame');
+      f.title = `${project.name} game`;
+      f.allow = 'fullscreen; gamepad';
+      f.setAttribute('allowfullscreen', '');
+      f.addEventListener('load', () => {
+        try {
+          f.contentDocument?.addEventListener(
+            'keydown',
+            (e) => {
+              if (e.key === 'Escape') release();
+            },
+            true,
+          );
+        } catch {
+          /* cross-origin host: Esc cannot be seen; clicking outside still returns the keyboard */
+        }
+      });
+      iframe = f;
+      frame.prepend(f);
+      f.src = pageUrl.href;
+    });
+  };
+
+  const refresh = (): void => {
+    shown = '';
+    if (lastState) update(lastState);
+  };
+
   const update = (state: DesktopState): void => {
-    const view = stageView(project.stage, state.stages[slug], state.layout);
+    lastState = state;
+    const stageState = state.stages[slug];
+    if (stageState !== 'loaded' && stageState !== 'paused') buildFailed = false;
+    const webgl2 = project.stage.medium === 'unity-webgl' ? hasWebGL2() : true;
+    const view = stageView(project.stage, stageState, state.layout, { webgl2, buildFailed });
     const key = JSON.stringify(view);
     if (key === shown) return;
     shown = key;
+    teardown?.();
+    teardown = null;
+    pendingHint = null;
     const hadFocus = stageBox.contains(document.activeElement);
-    const node = stageNode(project, view, dispatch);
+    const node = stageNode(project, view, dispatch, { mountUnity });
     const nodes: HTMLElement[] = [node];
+    if (pendingHint) {
+      const actions = el('div', 'pw-stage-actions');
+      actions.append(pendingHint);
+      nodes.push(actions);
+      pendingHint = null;
+    }
     if ('link' in view && view.link) {
       const actions = el('div', 'pw-stage-actions');
       actions.append(stageLink(view.link));

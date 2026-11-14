@@ -7,11 +7,14 @@ import {
   projectWindowId,
   SIDEBAR_ITEMS,
   slugFromWindowId,
+  KEYBOARD_HINT,
+  keyboardOwner,
   stageView,
   validateSlots,
   visibleSlots,
 } from './ProjectModel';
 
+const KCC = { medium: 'unity-webgl', buildPath: 'kcc/index.html', videoUrl: '', maxBuildMB: 15 } as const;
 const ORDER = ['controlsNotes', 'category', 'title', 'tags', 'summary', 'links', 'specs', 'deepDive', 'challenges'];
 
 describe('project data', () => {
@@ -163,11 +166,50 @@ describe('stageView', () => {
       }
     }
   });
-  it('shows a coming-soon poster for the Unity stage and never loads it yet', () => {
-    expect(stageView({ medium: 'unity-webgl' }, 'poster', 'desktop')).toEqual({
+  it('shows a coming-soon poster when the Unity stage has no build path', () => {
+    expect(stageView({ ...KCC, buildPath: '' }, 'poster', 'desktop')).toEqual({
       kind: 'poster', canLoad: false, comingSoon: true, link: null,
     });
   });
+});
+
+describe('stageView: Unity (KCC) stage', () => {
+  it('shows a loadable poster, then the build, then paused, on desktop with WebGL 2', () => {
+    expect(stageView(KCC, 'poster', 'desktop')).toEqual({ kind: 'poster', canLoad: true, comingSoon: false, link: null });
+    expect(stageView(KCC, undefined, 'desktop')).toMatchObject({ kind: 'poster', canLoad: true });
+    expect(stageView(KCC, 'loaded', 'desktop')).toEqual({ kind: 'unity', buildPath: 'kcc/index.html', maxBuildMB: 15 });
+    expect(stageView(KCC, 'paused', 'desktop')).toEqual({ kind: 'paused' });
+  });
+  it('uses the video slot on phones in every lifecycle state, with no source by default', () => {
+    for (const st of [undefined, 'loaded', 'paused'] as const) {
+      expect(stageView(KCC, st, 'phone')).toEqual({ kind: 'video', videoUrl: null, reason: 'phone' });
+    }
+  });
+  it('uses the video slot without WebGL 2', () => {
+    expect(stageView(KCC, 'loaded', 'desktop', { webgl2: false, buildFailed: false })).toEqual({
+      kind: 'video', videoUrl: null, reason: 'no-webgl2',
+    });
+  });
+  it('falls back to the video once a loaded build failed, but keeps the poster when not loaded', () => {
+    const env = { webgl2: true, buildFailed: true };
+    expect(stageView(KCC, 'loaded', 'desktop', env)).toMatchObject({ kind: 'video', reason: 'build-unavailable' });
+    expect(stageView(KCC, 'poster', 'desktop', env)).toMatchObject({ kind: 'poster', canLoad: true });
+  });
+  it('passes a supplied video url through and treats blank as none', () => {
+    expect(stageView({ ...KCC, videoUrl: ' v.mp4 ' }, 'poster', 'phone')).toMatchObject({ videoUrl: 'v.mp4' });
+    expect(stageView({ ...KCC, videoUrl: '  ' }, 'poster', 'phone')).toMatchObject({ videoUrl: null });
+  });
+  it('ships with no video url and a 15 MB budget', () => {
+    expect(PROJECTS[0]?.stage).toMatchObject({ videoUrl: '', maxBuildMB: 15 });
+  });
+  it('labels who has the keyboard', () => {
+    expect(keyboardOwner(true)).toBe('game');
+    expect(keyboardOwner(false)).toBe('desktop');
+    expect(KEYBOARD_HINT.game).toBe('Keyboard: game');
+  });
+});
+
+describe('stage data', () => {
   it('gives the live projects an iframe url and the others none', () => {
     expect(PROJECTS.map((p) => p.stage.medium)).toEqual(['unity-webgl', 'in-progress', 'iframe', 'iframe']);
     expect(PROJECTS.filter((p) => p.stage.medium === 'iframe').every((p) => 'url' in p.stage && p.stage.url.startsWith('https://'))).toBe(true);

@@ -59,13 +59,20 @@ export interface ProjectSlots {
 }
 
 /**
- * What the Project stage shows. `iframe` loads a live site on click; `unity-webgl` is the Unity build
- * (arrives with its own ticket, so it only shows a poster for now); `in-progress` is the structural
- * placeholder for a project that has no embeddable build yet.
+ * What the Project stage shows. `iframe` loads a live site on click; `unity-webgl` is the Unity build;
+ * `in-progress` is the structural placeholder for a project that has no embeddable build yet.
+ *
+ * `unity-webgl` fields:
+ * - `buildPath`: the build's page, relative to the site base (resolved against the page URL, never root-absolute).
+ *   Empty string = no build yet (poster + `[ ... ]` only).
+ * - `videoUrl`: gameplay video for phones, browsers without WebGL 2, and builds that cannot load. Empty = only the
+ *   `[ ... ]` slot shows (no `src`). Set it to a file or URL once the video exists.
+ * - `maxBuildMB`: budget for the build's compressed transfer size (spec: 15 MB Brotli). A host that sends no
+ *   `Content-Encoding` for the large files, or whose reported sizes exceed this, uses the video instead.
  */
 export type StageSpec =
   | { medium: 'iframe'; url: string }
-  | { medium: 'unity-webgl' }
+  | { medium: 'unity-webgl'; buildPath: string; videoUrl: string; maxBuildMB: number }
   | { medium: 'in-progress' };
 
 export interface ProjectEntry {
@@ -97,7 +104,7 @@ function placeholderSlots(): ProjectSlots {
 }
 
 export const PROJECTS: readonly ProjectEntry[] = [
-  { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', stage: { medium: 'unity-webgl' }, slots: placeholderSlots() },
+  { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', stage: { medium: 'unity-webgl', buildPath: 'kcc/index.html', videoUrl: '', maxBuildMB: 15 }, slots: placeholderSlots() },
   { slug: 'drone-desktop', name: 'Drone Desktop', stage: { medium: 'in-progress' }, slots: placeholderSlots() },
   { slug: 'photography-portfolio', name: 'Photography Portfolio', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/Photography-Portfolio/' }, slots: placeholderSlots() },
   { slug: 'music-studio-website', name: 'Music Studio Website', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/AlcoveSite/' }, slots: placeholderSlots() },

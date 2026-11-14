@@ -462,6 +462,26 @@ body {
   padding-inline: 16px;
 }
 
+/* Keyboard hint under the KCC stage: structural chrome, who has the keyboard. */
+.pw-kbd {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--desk-green-mid);
+}
+
+.pw-stage[data-keyboard='game'] + .pw-stage-actions .pw-kbd {
+  color: var(--desk-green);
+}
+
+.pw-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
 /* In-progress stage: a structural wireframe (title bar, side rail, content area), no copy. */
 .pw-stage.is-wire {
   background: none;
