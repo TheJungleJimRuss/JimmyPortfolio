@@ -58,10 +58,21 @@ export interface ProjectSlots {
   challenges?: WriteUp;
 }
 
+/**
+ * What the Project stage shows. `iframe` loads a live site on click; `unity-webgl` is the Unity build
+ * (arrives with its own ticket, so it only shows a poster for now); `in-progress` is the structural
+ * placeholder for a project that has no embeddable build yet.
+ */
+export type StageSpec =
+  | { medium: 'iframe'; url: string }
+  | { medium: 'unity-webgl' }
+  | { medium: 'in-progress' };
+
 export interface ProjectEntry {
   slug: string;
   /** Project name shown in the File Explorer. */
   name: string;
+  stage: StageSpec;
   slots: ProjectSlots;
 }
 
@@ -86,8 +97,8 @@ function placeholderSlots(): ProjectSlots {
 }
 
 export const PROJECTS: readonly ProjectEntry[] = [
-  { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', slots: placeholderSlots() },
-  { slug: 'drone-desktop', name: 'Drone Desktop', slots: placeholderSlots() },
-  { slug: 'photography-portfolio', name: 'Photography Portfolio', slots: placeholderSlots() },
-  { slug: 'music-studio-website', name: 'Music Studio Website', slots: placeholderSlots() },
+  { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', stage: { medium: 'unity-webgl' }, slots: placeholderSlots() },
+  { slug: 'drone-desktop', name: 'Drone Desktop', stage: { medium: 'in-progress' }, slots: placeholderSlots() },
+  { slug: 'photography-portfolio', name: 'Photography Portfolio', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/Photography-Portfolio/' }, slots: placeholderSlots() },
+  { slug: 'music-studio-website', name: 'Music Studio Website', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/AlcoveSite/' }, slots: placeholderSlots() },
 ];

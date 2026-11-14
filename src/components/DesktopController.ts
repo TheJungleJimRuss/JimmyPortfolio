@@ -22,6 +22,8 @@ export interface DesktopOptions {
   /** Content nodes for windows that have real content yet; others show a framed `[ ... ]` slot. */
   content?: Partial<Record<WindowId, HTMLElement>>;
   /** Builds content for a window when it is first created (used for Project windows); `null` keeps the slot. */
+  /** Called after every render with the new state, so content views can follow it (e.g. Project stages). */
+  onState?: (state: DesktopState) => void;
   contentFor?: (id: WindowId, dispatch: (action: DesktopAction) => void) => HTMLElement | null;
 }
 
@@ -296,6 +298,7 @@ export class DesktopController {
       this.els.live.textContent = state.announcement;
     }
     this.lastAnnouncement = state.announcement;
+    this.options.onState?.(state);
   }
 
   private renderTaskbar(): void {

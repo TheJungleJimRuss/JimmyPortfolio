@@ -7,6 +7,7 @@ import {
   projectWindowId,
   SIDEBAR_ITEMS,
   slugFromWindowId,
+  stageView,
   validateSlots,
   visibleSlots,
 } from './ProjectModel';
@@ -100,7 +101,7 @@ describe('lookup and ids', () => {
   it('finds a project by slug', () => {
     expect(findProject('drone-desktop')?.name).toBe('Drone Desktop');
     expect(findProject('nope')).toBeUndefined();
-    const custom: ProjectEntry[] = [{ slug: 'a', name: 'A', slots: {} }];
+    const custom: ProjectEntry[] = [{ slug: 'a', name: 'A', stage: { medium: 'in-progress' }, slots: {} }];
     expect(findProject('a', custom)?.name).toBe('A');
   });
 });
@@ -116,7 +117,7 @@ describe('explorer', () => {
     const rows = explorerRows();
     expect(rows).toHaveLength(4);
     expect(rows[0]).toMatchObject({ slug: 'kinematic-character-controller', windowId: 'project:kinematic-character-controller', category: PLACEHOLDER });
-    const custom: ProjectEntry[] = [{ slug: 'a', name: 'A', slots: { category: 'Tool' } }, { slug: 'b', name: 'B', slots: {} }];
+    const custom: ProjectEntry[] = [{ slug: 'a', name: 'A', stage: { medium: 'in-progress' }, slots: { category: 'Tool' } }, { slug: 'b', name: 'B', stage: { medium: 'in-progress' }, slots: {} }];
     expect(explorerRows(custom).map((r) => r.category)).toEqual(['Tool', PLACEHOLDER]);
   });
   it('sidebar: Projects stays in the explorer, About and Contact open windows', () => {
@@ -125,5 +126,50 @@ describe('explorer', () => {
       { kind: 'window', id: 'about' },
       { kind: 'window', id: 'contact' },
     ]);
+  });
+});
+
+describe('stageView', () => {
+  const live = { medium: 'iframe', url: 'https://example.test/' } as const;
+  it('shows a loadable poster before any click, with nothing embedded', () => {
+    for (const st of [undefined, 'poster'] as const) {
+      expect(stageView(live, st, 'desktop')).toEqual({ kind: 'poster', canLoad: true, comingSoon: false, link: null });
+    }
+  });
+  it('embeds the site with a visit link once loaded', () => {
+    expect(stageView(live, 'loaded', 'desktop')).toEqual({
+      kind: 'iframe',
+      url: 'https://example.test/',
+      link: { label: 'Visit site', url: 'https://example.test/' },
+    });
+  });
+  it('drops the embed while paused', () => {
+    expect(stageView(live, 'paused', 'desktop')).toEqual({ kind: 'paused' });
+  });
+  it('never embeds on phones: poster plus a new-tab link, whatever the state', () => {
+    for (const st of [undefined, 'poster', 'loaded', 'paused'] as const) {
+      expect(stageView(live, st, 'phone')).toEqual({
+        kind: 'poster',
+        canLoad: false,
+        comingSoon: false,
+        link: { label: 'Open live site', url: 'https://example.test/' },
+      });
+    }
+  });
+  it('keeps the in-progress stage at every layout and state', () => {
+    for (const layout of ['desktop', 'phone'] as const) {
+      for (const st of [undefined, 'loaded', 'paused'] as const) {
+        expect(stageView({ medium: 'in-progress' }, st, layout)).toEqual({ kind: 'in-progress' });
+      }
+    }
+  });
+  it('shows a coming-soon poster for the Unity stage and never loads it yet', () => {
+    expect(stageView({ medium: 'unity-webgl' }, 'poster', 'desktop')).toEqual({
+      kind: 'poster', canLoad: false, comingSoon: true, link: null,
+    });
+  });
+  it('gives the live projects an iframe url and the others none', () => {
+    expect(PROJECTS.map((p) => p.stage.medium)).toEqual(['unity-webgl', 'in-progress', 'iframe', 'iframe']);
+    expect(PROJECTS.filter((p) => p.stage.medium === 'iframe').every((p) => 'url' in p.stage && p.stage.url.startsWith('https://'))).toBe(true);
   });
 });

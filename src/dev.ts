@@ -6,7 +6,7 @@ import './styles/desktop.css';
 
 import { DesktopController } from './components/DesktopController';
 import { createFileExplorer } from './components/FileExplorerView';
-import { createProjectWindow } from './components/ProjectWindowView';
+import { createProjectWindow, type ProjectWindowHandle } from './components/ProjectWindowView';
 import { createAboutWindow } from './components/AboutWindowView';
 import { createContactWindow } from './components/ContactWindowView';
 import { slugFromWindowId } from './components/ProjectModel';
@@ -58,16 +58,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroInner = heroSource?.querySelector<HTMLElement>('.wf-hero-inner');
   if (!root || !surface || !icons || !taskbarButtons || !clock || !live || !heroInner) return;
 
+  const projectWindows = new Map<string, ProjectWindowHandle>();
   const desktop = new DesktopController(
     { root, surface, icons, taskbarButtons, clock, live },
     {
       content: { hero: heroInner },
+      onState(state) {
+        for (const handle of projectWindows.values()) handle.update(state);
+      },
       contentFor(id, dispatch) {
         if (id === 'projects') return createFileExplorer(dispatch);
         if (id === 'about') return createAboutWindow();
         if (id === 'contact') return createContactWindow();
         const slug = slugFromWindowId(id);
-        return slug === null ? null : createProjectWindow(slug);
+        if (slug === null) return null;
+        const handle = createProjectWindow(slug, dispatch);
+        if (!handle) return null;
+        projectWindows.set(slug, handle);
+        return handle.el;
       },
     },
   );

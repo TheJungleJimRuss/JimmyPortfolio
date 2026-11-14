@@ -1,5 +1,6 @@
-import type { Inline, WriteUp, WriteUpBlock } from '../data/projects';
-import { findProject, visibleSlots, type SlotView } from './ProjectModel';
+import type { Inline, ProjectEntry, WriteUp, WriteUpBlock } from '../data/projects';
+import type { DesktopAction, DesktopState } from './DesktopState';
+import { findProject, stageView, visibleSlots, type SlotView, type StageLink, type StageView } from './ProjectModel';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
@@ -95,24 +96,97 @@ function slotNode(view: SlotView): HTMLElement {
   }
 }
 
+export interface ProjectWindowHandle {
+  el: HTMLElement;
+  /** Re-renders only the stage area from Desktop state; the slot column and its scroll position stay. */
+  update(state: DesktopState): void;
+}
+
+/** Trusted sites only (our own GitHub Pages). allow-same-origin keeps their storage and relative fetches working
+ *  inside their own cross-origin frame; it does not touch this page. No top-navigation, downloads or modals. */
+const SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-forms';
+
+function stageLink(link: StageLink): HTMLAnchorElement {
+  const a = el('a', 'pw-link pw-stage-link', link.label);
+  a.href = link.url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  return a;
+}
+
+function stageNode(project: ProjectEntry, view: StageView, dispatch: (a: DesktopAction) => void): HTMLElement {
+  const frame = el('div', 'pw-stage');
+  frame.tabIndex = -1;
+  frame.setAttribute('role', 'group');
+  frame.setAttribute('aria-label', `${project.name} stage`);
+  frame.dataset.stage = view.kind;
+  switch (view.kind) {
+    case 'iframe': {
+      const f = el('iframe', 'pw-frame');
+      f.title = `${project.name} live site`;
+      f.loading = 'eager';
+      f.referrerPolicy = 'no-referrer';
+      f.setAttribute('sandbox', SANDBOX);
+      f.src = view.url;
+      frame.append(f);
+      break;
+    }
+    case 'poster': {
+      frame.append(el('span', 'pw-stage-marker', '[ ... ]'));
+      if (view.canLoad) {
+        const load = el('button', 'pw-load', 'Load');
+        load.type = 'button';
+        load.addEventListener('click', () => {
+          dispatch({ type: 'loadStage', slug: project.slug });
+        });
+        frame.append(load);
+      }
+      break;
+    }
+    case 'in-progress': {
+      frame.classList.add('is-wire');
+      for (const part of ['bar', 'side', 'main']) frame.append(el('span', `pw-wire pw-wire-${part}`));
+      frame.append(el('span', 'pw-stage-marker', '[ ... ]'));
+      break;
+    }
+    case 'paused':
+      frame.append(el('span', 'pw-stage-marker', '[ ... ]'));
+      break;
+  }
+  return frame;
+}
+
 /**
- * Project window content: the 16:9 stage area (poster placeholder only; loading arrives with the
- * stage ticket) and one scrolling column of optional slots below it.
+ * Project window content: the 16:9 stage area, driven by Desktop state through `update`, and one
+ * scrolling column of optional slots below it. Stage lifecycle lives in the reducer; this only renders it.
  */
-export function createProjectWindow(slug: string): HTMLElement | null {
+export function createProjectWindow(slug: string, dispatch: (a: DesktopAction) => void): ProjectWindowHandle | null {
   const project = findProject(slug);
   if (!project) return null;
   const root = el('div', 'pw');
   root.dataset.slug = slug;
 
-  const stage = el('div', 'pw-stage');
-  stage.setAttribute('role', 'img');
-  stage.setAttribute('aria-label', `${project.name} stage poster`);
-  stage.append(el('span', 'pw-stage-marker', '[ ... ]'));
-
+  const stageBox = el('div', 'pw-stagebox');
   const column = el('div', 'pw-column');
   for (const view of visibleSlots(project.slots)) column.append(slotNode(view));
+  root.append(stageBox, column);
 
-  root.append(stage, column);
-  return root;
+  let shown = '';
+  const update = (state: DesktopState): void => {
+    const view = stageView(project.stage, state.stages[slug], state.layout);
+    const key = JSON.stringify(view);
+    if (key === shown) return;
+    shown = key;
+    const hadFocus = stageBox.contains(document.activeElement);
+    const node = stageNode(project, view, dispatch);
+    const nodes: HTMLElement[] = [node];
+    if ('link' in view && view.link) {
+      const actions = el('div', 'pw-stage-actions');
+      actions.append(stageLink(view.link));
+      nodes.push(actions);
+    }
+    stageBox.replaceChildren(...nodes);
+    if (hadFocus) node.focus({ preventScroll: true });
+  };
+  return { el: root, update };
 }

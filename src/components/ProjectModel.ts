@@ -4,9 +4,10 @@ import {
   SLOT_LIMITS,
   type ProjectEntry,
   type ProjectSlots,
+  type StageSpec,
   type WriteUp,
 } from '../data/projects';
-import type { WindowId } from './DesktopState';
+import type { DesktopLayout, StageState, WindowId } from './DesktopState';
 
 export function projectWindowId(slug: string): WindowId {
   return `project:${slug}`;
@@ -132,3 +133,38 @@ export const SIDEBAR_ITEMS: readonly SidebarItem[] = [
   { label: 'About', target: { kind: 'window', id: 'about' } },
   { label: 'Contact', target: { kind: 'window', id: 'contact' } },
 ];
+
+/** Fixed chrome labels for stage links. */
+export const STAGE_LINK_LABELS = { visit: 'Visit site', open: 'Open live site' } as const;
+
+export interface StageLink {
+  label: string;
+  url: string;
+}
+
+/** What the stage area renders. Pure: the reducer owns the lifecycle, this only maps it to a view. */
+export type StageView =
+  | {
+      kind: 'poster';
+      /** Show the "Load" target (dispatches `loadStage`). */
+      canLoad: boolean;
+      /** Show the `[ ... ]` coming-soon slot (a medium whose build does not exist yet). */
+      comingSoon: boolean;
+      /** New-tab link (phones never embed). */
+      link: StageLink | null;
+    }
+  | { kind: 'iframe'; url: string; link: StageLink }
+  /** Minimized after loading: the iframe is removed (resume reloads it on restore). */
+  | { kind: 'paused' }
+  | { kind: 'in-progress' };
+
+export function stageView(stage: StageSpec, state: StageState | undefined, layout: DesktopLayout): StageView {
+  if (stage.medium === 'in-progress') return { kind: 'in-progress' };
+  if (stage.medium === 'unity-webgl') return { kind: 'poster', canLoad: false, comingSoon: true, link: null };
+  if (layout === 'phone') {
+    return { kind: 'poster', canLoad: false, comingSoon: false, link: { label: STAGE_LINK_LABELS.open, url: stage.url } };
+  }
+  if (state === 'loaded') return { kind: 'iframe', url: stage.url, link: { label: STAGE_LINK_LABELS.visit, url: stage.url } };
+  if (state === 'paused') return { kind: 'paused' };
+  return { kind: 'poster', canLoad: true, comingSoon: false, link: null };
+}
