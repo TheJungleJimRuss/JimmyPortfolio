@@ -230,7 +230,8 @@ body {
 
 /* ---------- File Explorer and Project windows ---------- */
 .desk-body:has(> .fx),
-.desk-body:has(> .pw) {
+.desk-body:has(> .pw),
+.desk-body:has(> .ac) {
   display: block;
   place-items: stretch;
 }
@@ -542,6 +543,135 @@ a.pw-link:hover {
 .pw-pre .pw-code {
   border: 0;
   padding: 0;
+}
+
+/* ---------- About and Contact windows ---------- */
+.ac {
+  min-height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.ac-slot {
+  margin: 0;
+  max-width: 100%;
+  color: var(--desk-text);
+}
+
+.ac-heading {
+  font: 600 1.15rem/1.25 var(--desk-font);
+  color: var(--desk-green);
+  text-wrap: balance;
+}
+
+.ac-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--desk-green-dim);
+}
+
+.ac-group-label {
+  margin: 0 0 6px;
+  font: 600 0.78rem/1.3 var(--desk-font);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--desk-green-mid);
+}
+
+.ac-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ac-tag {
+  padding: 3px 8px;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green-mid);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ac-copyright {
+  margin-top: auto;
+  padding-top: 12px;
+  width: 100%;
+  border-top: 1px solid var(--desk-green-faint);
+  color: var(--desk-green-mid);
+  font-size: 0.68rem;
+}
+
+.ac-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.ac-copy {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--desk-green);
+  background: transparent;
+  color: var(--desk-green);
+  font: inherit;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.ac-copy:hover:not(:disabled) {
+  background: var(--desk-green);
+  color: #000;
+}
+
+.ac-copy:focus-visible {
+  outline: 2px solid var(--desk-green);
+  outline-offset: 2px;
+}
+
+.ac-copy:disabled {
+  border-color: var(--desk-green-dim);
+  color: var(--desk-green-mid);
+  cursor: default;
+}
+
+.ac-toast {
+  padding: 3px 8px;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green);
+  font-size: 0.72rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.ac-toast[data-failed='true'] {
+  color: var(--desk-text);
+}
+
+.ac-toast.is-shown {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-toast {
+    transition: none;
+  }
 }
 
 /* ---------- Taskbar ---------- */

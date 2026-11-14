@@ -7,6 +7,8 @@ import './styles/desktop.css';
 import { DesktopController } from './components/DesktopController';
 import { createFileExplorer } from './components/FileExplorerView';
 import { createProjectWindow } from './components/ProjectWindowView';
+import { createAboutWindow } from './components/AboutWindowView';
+import { createContactWindow } from './components/ContactWindowView';
 import { slugFromWindowId } from './components/ProjectModel';
 import { IntroSequenceController } from './components/IntroSequenceController';
 import { createViewportLayoutAdapter } from './components/ViewportLayoutAdapter';
@@ -62,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
       content: { hero: heroInner },
       contentFor(id, dispatch) {
         if (id === 'projects') return createFileExplorer(dispatch);
+        if (id === 'about') return createAboutWindow();
+        if (id === 'contact') return createContactWindow();
         const slug = slugFromWindowId(id);
         return slug === null ? null : createProjectWindow(slug);
       },
