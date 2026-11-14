@@ -24,6 +24,8 @@ export interface DesktopOptions {
   /** Builds content for a window when it is first created (used for Project windows); `null` keeps the slot. */
   /** Called after every render with the new state, so content views can follow it (e.g. Project stages). */
   onState?: (state: DesktopState) => void;
+  /** Window to open when the Desktop is revealed (the arrival), parsed from the URL hash. */
+  deepLink?: WindowId | null;
   contentFor?: (id: WindowId, dispatch: (action: DesktopAction) => void) => HTMLElement | null;
 }
 
@@ -96,6 +98,11 @@ export class DesktopController {
     if (!this.isBooting()) return;
     this.els.root.classList.remove('is-booting');
     this.els.live.textContent = 'Desktop ready';
+    const deepLink = this.options.deepLink;
+    if (deepLink) {
+      this.dispatch({ type: 'arrive', deepLink });
+      this.state = { ...this.state, announcement: null };
+    }
   }
 
   dispose(): void {

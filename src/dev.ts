@@ -11,6 +11,8 @@ import { createAboutWindow } from './components/AboutWindowView';
 import { createContactWindow } from './components/ContactWindowView';
 import { slugFromWindowId } from './components/ProjectModel';
 import { IntroSequenceController } from './components/IntroSequenceController';
+import { DeepLinkHistory, parseDeepLink } from './components/DeepLink';
+import { PROJECTS } from './data/projects';
 import { createViewportLayoutAdapter } from './components/ViewportLayoutAdapter';
 
 // Enforce manual scroll restoration so reloading always starts at the top
@@ -58,12 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroInner = heroSource?.querySelector<HTMLElement>('.wf-hero-inner');
   if (!root || !surface || !icons || !taskbarButtons || !clock || !live || !heroInner) return;
 
+  let deepLinkHistory: DeepLinkHistory | null = null;
   const projectWindows = new Map<string, ProjectWindowHandle>();
   const desktop = new DesktopController(
     { root, surface, icons, taskbarButtons, clock, live },
     {
       content: { hero: heroInner },
+      deepLink: parseDeepLink(window.location.hash, PROJECTS.map((p) => p.slug)),
       onState(state) {
+        deepLinkHistory?.sync(state.deepLinked);
         for (const handle of projectWindows.values()) handle.update(state);
       },
       contentFor(id, dispatch) {
@@ -80,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   );
   desktop.mount();
+  deepLinkHistory = new DeepLinkHistory(() => desktop.dispatch({ type: 'back' }));
   heroSource?.remove();
 
   const introOverlay = document.getElementById('introOverlay');
