@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { HeroOutlineTracer } from './HeroOutlineTracer';
+import { HeroOutlineTracer, OUTLINE_LAYOUTS } from './HeroOutlineTracer';
 
 describe('HeroOutlineTracer', () => {
   let mockHeroElement: any;
@@ -60,6 +60,18 @@ describe('HeroOutlineTracer', () => {
     expect(mockPath1.style.strokeDashoffset).toBe('400');
   });
 
+  it('scales stroke-dasharray by screen CTM when vector-effect is non-scaling-stroke', () => {
+    mockPath1.getAttribute = vi.fn().mockReturnValue('non-scaling-stroke');
+    mockSvg.getScreenCTM = vi.fn().mockReturnValue({ a: 0.25 });
+
+    const tracer = new HeroOutlineTracer();
+    tracer.init(mockSvg, mockHeroElement);
+
+    // 400 * 0.25 = 100
+    expect(mockPath1.style.strokeDasharray).toBe('100 100');
+    expect(mockPath1.style.strokeDashoffset).toBe('100');
+  });
+
   it('falls back to precomputed path length when getTotalLength returns 0', () => {
     mockPath1.getTotalLength.mockReturnValue(0);
     const tracer = new HeroOutlineTracer();
@@ -92,5 +104,55 @@ describe('HeroOutlineTracer', () => {
 
     expect(mockPath1.style.strokeDashoffset).toBe('0');
     expect(mockHeroElement.classList.contains('is-materialized')).toBe(true);
+  });
+
+  describe('two-row outline', () => {
+    let russGroup: any;
+    let attrs: Record<string, string>;
+
+    beforeEach(() => {
+      attrs = {};
+      russGroup = { setAttribute: vi.fn((k: string, v: string) => { attrs[`russ:${k}`] = v; }) };
+      mockSvg.setAttribute = vi.fn((k: string, v: string) => { attrs[k] = v; });
+      mockSvg.querySelector = vi.fn((sel: string) => (sel === '.hero-trace-russ' ? russGroup : null));
+    });
+
+    it('applies the stacked viewBox and leaves the RUSS group in place', () => {
+      new HeroOutlineTracer().init(mockSvg, mockHeroElement);
+      expect(attrs.viewBox).toBe(OUTLINE_LAYOUTS.stacked.viewBox);
+      expect(attrs['russ:transform']).toBe('translate(0 0)');
+    });
+
+    it(
+      'finishes the trace on time with unchanged timing',
+      async () => {
+        const tracer = new HeroOutlineTracer();
+        tracer.init(mockSvg, mockHeroElement);
+        const onMaterialize = vi.fn();
+        const done = vi.fn();
+        tracer.startTrace(1500, onMaterialize).then(done);
+
+        // 2 paths, 50ms cascade, linear: last stroke closes at 50 + 1450 = 1500ms.
+        expect(mockPath2.style.strokeDashoffset).not.toBe('0');
+        await vi.advanceTimersByTimeAsync(49);
+        expect(mockPath1.style.transition).toBe('stroke-dashoffset 1450ms linear');
+        await vi.advanceTimersByTimeAsync(1450);
+        expect(mockPath2.style.transition).toBe('stroke-dashoffset 1450ms linear');
+        expect(mockHeroElement.classList.contains('is-materialized')).toBe(false);
+        expect(onMaterialize).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1);
+        expect(mockHeroElement.classList.contains('is-materialized')).toBe(true);
+        expect(onMaterialize).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(850);
+        expect(done).toHaveBeenCalled();
+      },
+    );
+
+    it('scales dash lengths by the CTM with the RUSS group translated by 0', () => {
+      mockPath1.getAttribute = vi.fn().mockReturnValue('non-scaling-stroke');
+      mockSvg.getScreenCTM = vi.fn().mockReturnValue({ a: 0.25 });
+      new HeroOutlineTracer().init(mockSvg, mockHeroElement);
+      expect(mockPath1.style.strokeDasharray).toBe('100 100');
+    });
   });
 });

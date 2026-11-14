@@ -28,6 +28,14 @@ class TactileAudioEngine {
     return this.enabled;
   }
 
+  /**
+   * Create/resume the AudioContext. Call synchronously inside a user gesture
+   * (iOS Safari only allows resume() there); later timer-driven ticks then play.
+   */
+  public unlock(): void {
+    this.ensureContext();
+  }
+
   private ensureContext(): AudioContext | null {
     if (!this.ctx && typeof window !== 'undefined') {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;

@@ -1,5 +1,7 @@
 export type GatewayBranch = 'none' | 'dev' | 'drone';
 
+export type PathwayPhase = 'enter' | 'leave' | 'down' | 'up' | 'cancel' | 'focus' | 'blur';
+
 export interface GatewayConfig {
   initialAudioEnabled?: boolean;
   defaultBranch?: GatewayBranch;
@@ -65,6 +67,15 @@ export class GatewayController implements IGatewayController {
     if (this.isDisposed || this.branch === branch) return;
     this.branch = branch;
     this.branchSubscribers.forEach((fn) => fn(branch));
+  }
+
+  /** Pointer/focus glow for a pathway: enter/down/focus light it; leave/up/cancel/blur clear it (only if this pathway owns it). */
+  public handlePathwayPointer(branch: Exclude<GatewayBranch, 'none'>, phase: PathwayPhase): void {
+    if (phase === 'enter' || phase === 'down' || phase === 'focus') {
+      this.setBranch(branch);
+    } else if (this.branch === branch) {
+      this.setBranch('none');
+    }
   }
 
   public toggleAudio(): boolean {

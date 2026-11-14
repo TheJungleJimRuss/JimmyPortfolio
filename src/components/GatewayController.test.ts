@@ -102,4 +102,46 @@ describe('GatewayController', () => {
     // Disposed controller should not trigger callbacks
     expect(config.onLaunchDev).not.toHaveBeenCalled();
   });
+
+  describe('pathway pointer glow', () => {
+    it('press on the Dev pathway sets the dev glow; release clears it', () => {
+      controller.mount(null, config);
+      controller.handlePathwayPointer('dev', 'down');
+      expect(controller.getBranch()).toBe('dev');
+      controller.handlePathwayPointer('dev', 'up');
+      expect(controller.getBranch()).toBe('none');
+    });
+
+    it('cancel and leave clear the glow', () => {
+      controller.handlePathwayPointer('dev', 'down');
+      controller.handlePathwayPointer('dev', 'cancel');
+      expect(controller.getBranch()).toBe('none');
+      controller.handlePathwayPointer('dev', 'enter');
+      expect(controller.getBranch()).toBe('dev');
+      controller.handlePathwayPointer('dev', 'leave');
+      expect(controller.getBranch()).toBe('none');
+    });
+
+    it('focus sets the glow and blur clears it', () => {
+      controller.handlePathwayPointer('drone', 'focus');
+      expect(controller.getBranch()).toBe('drone');
+      controller.handlePathwayPointer('drone', 'blur');
+      expect(controller.getBranch()).toBe('none');
+    });
+
+    it('a stale release for another pathway does not clear the active glow', () => {
+      controller.handlePathwayPointer('dev', 'down');
+      controller.handlePathwayPointer('drone', 'up');
+      expect(controller.getBranch()).toBe('dev');
+    });
+
+    it('does not change hotkey behavior', () => {
+      controller.mount(null, config);
+      controller.handlePathwayPointer('dev', 'down');
+      controller.handleKey({ key: 'd' });
+      controller.handleKey({ key: 'f' });
+      expect(config.onLaunchDev).toHaveBeenCalledTimes(1);
+      expect(config.onLaunchDrone).toHaveBeenCalledTimes(1);
+    });
+  });
 });

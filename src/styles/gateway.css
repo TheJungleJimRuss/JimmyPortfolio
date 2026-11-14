@@ -19,16 +19,30 @@
 .wf-gateway-view {
   position: fixed;
   inset: 0;
+  height: 100vh;
+  height: 100dvh;
   z-index: 1000;
   background-color: var(--gateway-bg);
   color: var(--gateway-text-obsidian);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 24px 32px;
+  padding: max(24px, env(safe-area-inset-top)) max(32px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-left));
   overflow: hidden;
   user-select: none;
+  animation: gatewayEntranceFade 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+@keyframes gatewayEntranceFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.988);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .wf-gateway-view[hidden] {
@@ -52,17 +66,31 @@
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   padding: 6px 10px;
+  min-height: 44px;
+  min-width: 44px;
+  margin: -6px -10px; /* 44px target without shifting the desktop layout */
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: color 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-.wf-gateway-audio-minimal:hover,
 .wf-gateway-audio-minimal:focus-visible {
   color: #d0d7e2;
   outline: none;
+}
+
+.wf-gateway-audio-minimal:active {
+  color: #d0d7e2;
+}
+
+@media (hover: hover) {
+  .wf-gateway-audio-minimal:hover {
+    color: #d0d7e2;
+  }
 }
 
 .wf-gateway-audio-minimal.is-active {
@@ -83,12 +111,21 @@
 }
 
 .wf-gateway-audio-hint {
-  color: #4a515e;
+  color: inherit; /* visible by default on devices without hover */
   font-size: 0.68rem;
   transition: color 0.2s ease;
 }
 
-.wf-gateway-audio-minimal:hover .wf-gateway-audio-hint,
+@media (hover: hover) {
+  .wf-gateway-audio-hint {
+    color: #4a515e;
+  }
+
+  .wf-gateway-audio-minimal:hover .wf-gateway-audio-hint {
+    color: inherit;
+  }
+}
+
 .wf-gateway-audio-minimal.is-active .wf-gateway-audio-hint {
   color: inherit;
 }
@@ -120,6 +157,7 @@
   width: 100%;
   max-width: 1200px;
   padding: 10px 20px;
+  touch-action: none; /* finger drag tilts the hero instead of scrolling */
   cursor: default;
   perspective: 900px;
   perspective-origin: 50% 50%;
@@ -133,10 +171,23 @@
   height: clamp(200px, 28vw, 360px);
   margin: 0 auto;
   pointer-events: none;
+  filter: drop-shadow(0 0 0px transparent);
+  transition: filter 0.35s ease;
+  will-change: filter;
 }
 
 .wf-gateway-hero-anchor.has-3d .wf-gateway-hero-canvas {
   display: block;
+}
+
+.wf-gateway-hero-anchor[data-state='dev'] .wf-gateway-hero-canvas {
+  filter:
+    drop-shadow(0 0 8px rgba(0, 255, 65, 0.45))
+    drop-shadow(0 0 20px rgba(0, 255, 65, 0.20));
+}
+
+.wf-gateway-hero-anchor[data-state='drone'] .wf-gateway-hero-canvas {
+  filter: drop-shadow(0 0 0px transparent);
 }
 
 .wf-gateway-hero-anchor.has-3d .wf-gateway-name {
@@ -166,6 +217,11 @@
   transition: transform 0.12s ease-out;
   user-select: none;
   white-space: nowrap;
+}
+
+/* Stacked name (portrait / narrow): JIMMY over RUSS. Set on <html> by the layout adapter. */
+[data-name-layout='stacked'] .wf-3d-slice .wf-name-word {
+  display: block;
 }
 
 /* 3D Volumetric Extruded Slices (Physical Solid Letter Slabs) */
@@ -200,32 +256,30 @@
   transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
-/* Dev Hover State: Matte Phosphor Green Letter Emission */
+/* Dev Hover State: Refined Phosphor Green Letter Emission */
 .wf-gateway-hero-anchor[data-state='dev'] .wf-3d-slice.is-front {
   color: #ffffff;
   text-shadow:
-    0 0 10px rgba(0, 255, 65, 0.95),
-    0 0 25px rgba(0, 255, 65, 0.75),
-    0 0 45px rgba(0, 255, 65, 0.45);
+    0 0 8px rgba(0, 255, 65, 0.8),
+    0 0 18px rgba(0, 255, 65, 0.45);
 }
 
 .wf-gateway-hero-anchor[data-state='dev'] .wf-3d-slice.is-side {
-  color: #00aa33 !important;
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+  color: #00bb38 !important;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
 }
 
-/* Drone Hover State: Matte Sky Blue Letter Emission */
+/* Drone Hover State: Neutral Solid (Effect deferred) */
 .wf-gateway-hero-anchor[data-state='drone'] .wf-3d-slice.is-front {
-  color: #ffffff;
-  text-shadow:
-    0 0 10px rgba(100, 181, 246, 0.95),
-    0 0 25px rgba(100, 181, 246, 0.75),
-    0 0 45px rgba(100, 181, 246, 0.45);
+  color: #f8f9fc;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
 }
 
 .wf-gateway-hero-anchor[data-state='drone'] .wf-3d-slice.is-side {
-  color: #42a5f5 !important;
-  text-shadow: 0 0 8px rgba(100, 181, 246, 0.6);
+  color: var(--side-color, #606876) !important;
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 /* Minimalist Typographic Pathways */
@@ -250,7 +304,10 @@
   background: transparent;
   border: none;
   padding: 6px 2px;
+  min-height: 44px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   position: relative;
   font-family: var(--font-sans);
   font-size: 0.95rem;
@@ -260,7 +317,7 @@
   color: #8c96a5;
   transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   user-select: none;
 }
@@ -281,8 +338,9 @@
 .wf-gateway-link::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
+  bottom: 10px; /* sits under the text inside the 44px target */
+  left: 2px;
+  right: 2px;
   width: 0%;
   height: 1px;
   background: currentColor;
@@ -290,9 +348,15 @@
   pointer-events: none;
 }
 
-.wf-gateway-link:hover::after,
-.wf-gateway-link:focus-visible::after {
+.wf-gateway-link:focus-visible::after,
+.wf-gateway-link:active::after {
   width: 100%;
+}
+
+@media (hover: hover) {
+  .wf-gateway-link:hover::after {
+    width: 100%;
+  }
 }
 
 .wf-gateway-link:focus-visible {
@@ -301,14 +365,24 @@
 }
 
 /* Dev Link Hover State */
-.wf-gateway-link.is-dev:hover,
-.wf-gateway-link.is-dev:focus-visible {
+.wf-gateway-link.is-dev:focus-visible,
+.wf-gateway-link.is-dev:active {
   color: #ffffff;
 }
 
-.wf-gateway-link.is-dev:hover .wf-gateway-link-num,
-.wf-gateway-link.is-dev:focus-visible .wf-gateway-link-num {
+.wf-gateway-link.is-dev:focus-visible .wf-gateway-link-num,
+.wf-gateway-link.is-dev:active .wf-gateway-link-num {
   color: var(--gateway-dev-green);
+}
+
+@media (hover: hover) {
+  .wf-gateway-link.is-dev:hover {
+    color: #ffffff;
+  }
+
+  .wf-gateway-link.is-dev:hover .wf-gateway-link-num {
+    color: var(--gateway-dev-green);
+  }
 }
 
 .wf-gateway-link.is-dev::after {
@@ -317,14 +391,24 @@
 }
 
 /* Drone Link Hover State */
-.wf-gateway-link.is-drone:hover,
-.wf-gateway-link.is-drone:focus-visible {
+.wf-gateway-link.is-drone:focus-visible,
+.wf-gateway-link.is-drone:active {
   color: #ffffff;
 }
 
-.wf-gateway-link.is-drone:hover .wf-gateway-link-num,
-.wf-gateway-link.is-drone:focus-visible .wf-gateway-link-num {
+.wf-gateway-link.is-drone:focus-visible .wf-gateway-link-num,
+.wf-gateway-link.is-drone:active .wf-gateway-link-num {
   color: var(--gateway-drone-sky);
+}
+
+@media (hover: hover) {
+  .wf-gateway-link.is-drone:hover {
+    color: #ffffff;
+  }
+
+  .wf-gateway-link.is-drone:hover .wf-gateway-link-num {
+    color: var(--gateway-drone-sky);
+  }
 }
 
 .wf-gateway-link.is-drone::after {
@@ -334,7 +418,7 @@
 
 @media (max-width: 680px) {
   .wf-gateway-view {
-    padding: 16px;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   }
   .wf-gateway-header {
     justify-content: center;
@@ -356,8 +440,8 @@
   }
   .wf-gateway-pathways-minimal {
     flex-direction: column;
-    gap: 12px;
-    margin-top: 18px;
+    gap: 4px;
+    margin-top: 14px;
     align-items: center;
   }
   .wf-gateway-path-divider {
@@ -366,5 +450,89 @@
   .wf-gateway-link {
     font-size: 0.92rem;
     gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-gateway-view {
+    animation: gatewayEntranceFadeReduced 0.2s linear both;
+    transition: opacity 0.2s linear;
+  }
+
+  .wf-gateway-audio-minimal,
+  .wf-gateway-audio-dot,
+  .wf-gateway-audio-hint,
+  .wf-gateway-link,
+  .wf-gateway-link-num,
+  .wf-gateway-link::after,
+  .wf-gateway-hero-canvas,
+  .wf-gateway-name,
+  .wf-3d-slice {
+    transition-duration: 0.01ms;
+  }
+}
+
+@keyframes gatewayEntranceFadeReduced {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Re-assert stacked canvas height after the narrow-viewport rule above */
+[data-name-layout='stacked'] .wf-gateway-hero-canvas {
+  height: clamp(240px, min(74vw, 42dvh), 440px);
+}
+[data-name-layout='stacked'] .wf-gateway-name {
+  font-size: clamp(3rem, 19vw, 6.5rem);
+  white-space: normal;
+}
+
+/* Touch drag hint: icon-only finger under the hero that sweeps left to right, shown on touch input until the first touch. */
+.wf-gateway-drag-hint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: calc(var(--hero-text-bottom, 100%) + 10px);
+  margin-left: -13px;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0.75;
+  transition: opacity 0.45s ease;
+}
+
+:root[data-input-mode='touch'] .wf-gateway-drag-hint {
+  display: block;
+}
+
+/* Room under the hero so the hint clears the pathways. */
+/* Only the CSS fallback hero needs it; the 3D canvas already has room under the letters. */
+:root[data-input-mode='touch'] .wf-gateway-hero-anchor:not(.has-3d) {
+  margin-bottom: 36px;
+}
+
+.wf-gateway-drag-hint.is-dismissed {
+  opacity: 0;
+}
+
+.wf-drag-hint-hand {
+  fill: none;
+  stroke: #c9d1dc;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+  animation: wfDragHintSweep 2.2s ease-in-out 1.2s infinite both;
+}
+
+/* Units are viewBox units (24 = icon width). */
+@keyframes wfDragHintSweep {
+  0% { transform: translateX(-22px); opacity: 0; }
+  15% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(22px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-drag-hint-hand {
+    animation: none;
   }
 }

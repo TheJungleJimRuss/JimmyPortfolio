@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@700;800&family=Schibsted+Grotesk:wght@800;900&display=swap');
-
 /* Composite Font: Outfit with Baseline-aligned 'J' from Schibsted Grotesk */
 @font-face {
   font-family: 'Outfit-Schibsted-J';
@@ -77,17 +75,6 @@ h4 {
 p,
 li {
   text-wrap: pretty;
-}
-
-.wf-container {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 24px 100px;
-}
-
-.wf-section {
-  padding: 72px 0;
-  border-bottom: 1px solid var(--border-wire);
 }
 
 .wf-label {
@@ -189,17 +176,8 @@ li {
 /* ==========================================================================
    1. FULL-VIEWPORT MINIMAL HERO HEADER
    ========================================================================== */
-.wf-hero-section {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  padding: 48px 0;
-  border-bottom: 1px solid var(--border-wire);
-}
+
+/* Fixed Gateway back-link: clears notch / safe areas, 44px tap target */
 
 .wf-hero-inner {
   width: 100%;
@@ -211,9 +189,12 @@ li {
 
 .wf-hero-name {
   font-family: var(--font-hero);
+  /* Original clamp on desktop; capped so JIMMY (3.19em) fits the width and both rows (1.88em) fit the height. */
   font-size: clamp(5.5rem, 16vw, 13.5rem);
+  font-size: min(clamp(5.5rem, 16vw, 13.5rem), calc((100vw - 3rem) / 3.3), calc((100vh - 8rem) / 2.1));
+  font-size: min(clamp(5.5rem, 16vw, 13.5rem), calc((100vw - 3rem) / 3.3), calc((100dvh - 8rem) / 2.1));
   font-weight: 800;
-  line-height: 0.94;
+  line-height: 0.94; /* 940 font units: the line pitch the stacked Outline trace uses */
   letter-spacing: -0.03em;
   text-transform: uppercase;
   color: var(--text-main);
@@ -221,151 +202,17 @@ li {
   user-select: none;
 }
 
-.wf-scroll-cue {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  color: var(--text-label);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  user-select: none;
+.wf-hero-line {
+  display: block;
 }
 
 /* ==========================================================================
    2. SELECTED PROJECTS GRID (SIMPLE DISPLAY)
    ========================================================================== */
-.wf-projects-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-
-.wf-project-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
-  cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.wf-project-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent-wire);
-}
-
-.wf-project-thumb {
-  height: 180px;
-}
-
-.wf-project-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.wf-project-title {
-  font-size: 1.25rem;
-  margin: 8px 0;
-}
 
 /* ==========================================================================
    3. DEDICATED PROJECT DETAIL VIEW (DEEP DIVE PAGE)
    ========================================================================== */
-.wf-detail-view {
-  padding-top: 48px;
-}
-
-.wf-detail-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-}
-
-.wf-detail-header {
-  margin-bottom: 36px;
-}
-
-.wf-detail-title {
-  font-family: var(--font-hero);
-  font-size: clamp(2.4rem, 5vw, 3.8rem);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: var(--text-main);
-  margin: 0 0 16px;
-  outline: none;
-}
-
-.wf-demo-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-.wf-demo-viewport {
-  aspect-ratio: 16 / 9;
-  min-height: 420px;
-  position: relative;
-  overflow: hidden;
-}
-
-.wf-demo-meta-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
-  background: var(--bg-box);
-  border: 1px solid var(--border-wire);
-  border-radius: 8px;
-}
-
-.wf-spec-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-}
-
-.wf-spec-list li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-right: 18px;
-  border-right: 1px solid var(--border-wire);
-}
-
-.wf-spec-list li:last-child {
-  border-right: none;
-  padding-right: 0;
-}
-
-.wf-detail-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 24px;
-}
-
-.wf-detail-footer {
-  margin-top: 36px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
 /* ==========================================================================
    VIEW TRANSITIONS API (same-document-transitions guidance)
@@ -376,17 +223,6 @@ li {
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.wf-project-thumb.is-transitioning,
-.wf-demo-viewport.is-transitioning {
-  view-transition-name: project-stage;
-}
-
-.wf-project-title.is-transitioning,
-.wf-detail-title.is-transitioning {
-  view-transition-name: project-title;
-  width: fit-content;
-}
-
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -395,74 +231,13 @@ li {
   }
 }
 
-@media (max-width: 860px) {
-  .wf-projects-grid,
-  .wf-detail-grid,
-  .wf-about-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ==========================================================================
    4. ABOUT & SKILLS
    ========================================================================== */
-.wf-about-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 24px;
-}
-
-.wf-about-box {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.wf-skills-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
 
 /* ==========================================================================
    5. CONTACT & SOCIALS
    ========================================================================== */
-.wf-contact-box {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 28px;
-  padding: 36px;
-}
-
-.wf-contact-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.wf-toast {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--accent-wire);
-  min-height: 18px;
-  margin-top: 8px;
-}
-
-.wf-site-footer {
-  padding: 40px 0 20px;
-  border-top: 1px solid var(--border-wire);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-label);
-}
 
 /* ==========================================================================
    6. FLOATING TOP CENTER PERSONA PILL TOGGLE

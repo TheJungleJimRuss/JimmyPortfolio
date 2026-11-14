@@ -1,0 +1,386 @@
+/* ==========================================================================
+   DESKTOP: the Dev portfolio surface (windows, icons, Taskbar).
+   Phosphor green on black. Flat chrome: hairline borders, no glow.
+   ========================================================================== */
+:root {
+  --desk-green: #00ff41;
+  --desk-green-mid: rgba(0, 255, 65, 0.55);
+  --desk-green-dim: rgba(0, 255, 65, 0.28);
+  --desk-green-faint: rgba(0, 255, 65, 0.07);
+  --desk-text: #f0f4f8;
+  --desk-taskbar-h: 48px;
+  --desk-titlebar-h: 34px;
+  --desk-font: var(--font-mono, ui-monospace, Menlo, monospace);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.desktop {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: var(--desk-green);
+  font-family: var(--desk-font);
+  overflow: clip;
+}
+
+.desk-surface {
+  position: absolute;
+  inset: 0 0 var(--desk-taskbar-h) 0;
+  overflow: clip;
+}
+
+/* ---------- Icons ---------- */
+.desk-icons {
+  position: absolute;
+  top: 16px;
+  right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 0;
+}
+
+.desk-icon {
+  all: unset;
+  box-sizing: border-box;
+  width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: 1px solid transparent;
+  color: var(--desk-green);
+  cursor: pointer;
+  text-align: center;
+}
+
+.desk-icon:hover {
+  background: var(--desk-green-faint);
+  border-color: var(--desk-green-dim);
+}
+
+.desk-icon:focus-visible,
+.taskbar-btn:focus-visible,
+.taskbar-gateway:focus-visible,
+.desk-control:focus-visible,
+.desk-drag-handle:focus-visible {
+  outline: 2px solid var(--desk-green);
+  outline-offset: 2px;
+}
+
+.desk-icon-glyph {
+  width: 32px;
+  height: 32px;
+}
+
+.desk-icon-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Windows ---------- */
+.desk-window {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--win-w);
+  height: var(--win-h);
+  transform: translate(var(--win-x), var(--win-y));
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-text);
+  outline: none;
+  animation: deskWindowIn 140ms ease-out;
+}
+
+.desk-window.is-focused {
+  border-color: var(--desk-green);
+}
+
+.desk-window.is-maximized {
+  transform: none;
+  width: 100%;
+  height: 100%;
+}
+
+.desk-titlebar {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: var(--desk-titlebar-h);
+  border-bottom: 1px solid var(--desk-green-dim);
+  background: var(--desk-green-faint);
+}
+
+.desk-window.is-focused .desk-titlebar {
+  border-bottom-color: var(--desk-green-mid);
+}
+
+.desk-drag-handle {
+  all: unset;
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font: 600 0.75rem/1 var(--desk-font);
+  letter-spacing: 0.06em;
+  color: var(--desk-green-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.desk-window.is-focused .desk-drag-handle {
+  color: var(--desk-green);
+}
+
+.desk-drag-handle[data-draggable='true'] {
+  cursor: grab;
+}
+
+.desk-drag-handle.is-dragging {
+  cursor: grabbing;
+}
+
+.desk-controls {
+  display: flex;
+}
+
+.desk-control {
+  all: unset;
+  box-sizing: border-box;
+  width: 38px;
+  display: grid;
+  place-items: center;
+  border-left: 1px solid var(--desk-green-dim);
+  color: var(--desk-green);
+  font: 500 0.95rem/1 var(--desk-font);
+  cursor: pointer;
+}
+
+.desk-control:hover {
+  background: var(--desk-green);
+  color: #000;
+}
+
+.desk-control[hidden] {
+  display: none;
+}
+
+.desk-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+  /* Size container so the Hero name can scale to the window (cqw/cqh). */
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+
+.desk-slot {
+  color: var(--desk-green-mid);
+  font-size: 0.8rem;
+  padding: 16px;
+}
+
+/* Hero name inside the Hero window: Stacked name, scaled to the window body. */
+.desk-body .wf-hero-inner {
+  width: 100%;
+  max-width: none;
+}
+
+.desk-body .wf-hero-name {
+  font-size: min(calc(100cqw / 3.7), calc(100cqh / 2.5));
+  text-align: center;
+}
+
+.desk-body .wf-hero-trace-svg {
+  max-width: none;
+}
+
+/* ---------- Taskbar ---------- */
+.taskbar {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: var(--desk-taskbar-h);
+  padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left));
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #000;
+  border-top: 1px solid var(--desk-green-dim);
+  z-index: 10000;
+}
+
+.taskbar-gateway {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green);
+  text-decoration: none;
+  font: 600 0.72rem/1 var(--desk-font);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.taskbar-gateway:hover {
+  background: var(--desk-green);
+  color: #000;
+}
+
+.taskbar-buttons {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.taskbar-btn {
+  all: unset;
+  box-sizing: border-box;
+  flex: 0 1 140px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--desk-green-dim);
+  color: var(--desk-green-mid);
+  font: 500 0.72rem/1 var(--desk-font);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.taskbar-btn:hover {
+  border-color: var(--desk-green-mid);
+}
+
+.taskbar-btn[aria-pressed='true'] {
+  background: var(--desk-green-faint);
+  border-color: var(--desk-green);
+  color: var(--desk-green);
+}
+
+.taskbar-btn.is-minimized {
+  border-style: dashed;
+}
+
+.taskbar-clock {
+  min-width: 3.4em;
+  text-align: right;
+  font: 500 0.78rem/1 var(--desk-font);
+  color: var(--desk-green-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Boot: Desktop is laid out but unseen until the hero materializes ---------- */
+.desktop.is-booting .desk-window,
+.desktop.is-booting .desk-icons,
+.desktop.is-booting .taskbar {
+  visibility: hidden;
+  animation: none;
+}
+
+.desktop:not(.is-booting) .desk-icons,
+.desktop:not(.is-booting) .taskbar {
+  animation: deskWindowIn 300ms ease-out;
+}
+
+@keyframes deskWindowIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- Phone: one full-screen window above the Taskbar ---------- */
+.desktop[data-layout='phone'] .desk-icons {
+  display: none;
+}
+
+.desktop[data-layout='phone'] .desk-window {
+  inset: 0;
+  transform: none;
+  width: 100%;
+  height: 100%;
+  border-width: 0 0 1px;
+}
+
+.desktop[data-layout='phone'] .desk-drag-handle {
+  cursor: default;
+  touch-action: auto;
+}
+
+.desktop[data-layout='phone'] .desk-body {
+  overflow-y: auto;
+}
+
+@media (max-width: 559px) {
+  .desktop[data-layout='phone'] {
+    --desk-taskbar-h: 92px;
+  }
+  .desktop[data-layout='phone'] .taskbar {
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 6px;
+  }
+  .desktop[data-layout='phone'] .taskbar-buttons {
+    order: -1;
+    flex: 0 0 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .desktop[data-layout='phone'] .taskbar-btn {
+    justify-content: center;
+    padding: 0 4px;
+  }
+  .desktop[data-layout='phone'] .taskbar-clock {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-window,
+  .desktop:not(.is-booting) .desk-icons,
+  .desktop:not(.is-booting) .taskbar {
+    animation: none;
+  }
+}

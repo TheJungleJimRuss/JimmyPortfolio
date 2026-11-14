@@ -21,8 +21,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
   box-sizing: border-box;
+  /* Lets the boot log size its font from the overlay's content width (cqi) */
+  container-type: inline-size;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: var(--color-phosphor-green);
   cursor: pointer;
@@ -67,7 +69,13 @@
   width: 100%;
   max-width: 680px;
   min-height: 180px;
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  /* Longest log line is --log-cols characters (set from the command list by
+     IntroSequenceController). Monospace advance is ~0.6em, so 0.62 leaves slack.
+     Font shrinks until the longest line fits one row; never grows past 0.95rem. */
+  --log-cols: 80;
+  font-size: min(0.95rem, calc(min(100cqi, 680px) / (var(--log-cols) * 0.62)));
+  white-space: pre;
+  overflow: hidden;
   line-height: 1.6;
   text-align: left;
   display: none;
@@ -112,8 +120,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
-  max-width: clamp(340px, 85vw, 840px);
-  aspect-ratio: 710 / 370;
+  max-width: min(100%, 840px);
+  aspect-ratio: 3191 / 1903;
   height: auto;
   overflow: visible;
   z-index: 10;
@@ -130,9 +138,11 @@
 
 .wf-hero-trace-svg.is-fading-out,
 .wf-hero-trace-svg.is-active.is-fading-out {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
+  opacity: 0 !important;
+  visibility: visible !important;
+  filter: drop-shadow(0 0 4px var(--color-phosphor-green));
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.65s ease !important;
+  pointer-events: none;
 }
 
 .hero-trace-path {
@@ -151,9 +161,51 @@
   visibility: hidden !important;
 }
 
-/* Materialized state: fills in solid text smoothly */
+/* Materialized state: fills in solid text with organic phosphor bloom settling to white */
+@keyframes heroMaterializeBloom {
+  0% {
+    opacity: 0;
+    color: var(--color-phosphor-green);
+    text-shadow: 0 0 26px var(--color-phosphor-glow), 0 0 54px rgba(0, 255, 65, 0.45);
+    transform: scale(0.994);
+  }
+  30% {
+    opacity: 1;
+    color: var(--color-phosphor-green);
+    text-shadow: 0 0 20px var(--color-phosphor-glow), 0 0 40px rgba(0, 255, 65, 0.35);
+    transform: scale(1);
+  }
+  65% {
+    opacity: 1;
+    color: #d6fae2;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+  }
+  100% {
+    opacity: 1;
+    color: var(--text-main);
+    text-shadow: none;
+    transform: scale(1);
+  }
+}
+
 .wf-hero-name.is-materialized {
   opacity: 1 !important;
   visibility: visible !important;
-  transition: opacity 0.25s ease;
+  animation: heroMaterializeBloom 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  will-change: opacity, color, text-shadow, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-hero-name.is-materialized {
+    animation: none !important;
+    opacity: 1 !important;
+    color: var(--text-main) !important;
+    text-shadow: none !important;
+    transform: none !important;
+  }
+  .wf-hero-trace-svg.is-fading-out,
+  .wf-hero-trace-svg.is-active.is-fading-out {
+    transition: none !important;
+    opacity: 0 !important;
+  }
 }

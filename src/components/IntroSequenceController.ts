@@ -1,6 +1,12 @@
 import { IntroCommandRunner } from './IntroCommandRunner';
 import { HeroOutlineTracer } from './HeroOutlineTracer';
 import { tactileAudio } from './TactileAudio';
+import type { ViewportLayoutAdapter } from './ViewportLayoutAdapter';
+
+export interface IntroSequenceOptions {
+  /** Holds the Hero name layout from intro start until the hero materializes. */
+  layoutAdapter?: Pick<ViewportLayoutAdapter, 'decision' | 'lock' | 'release'>;
+}
 
 export class IntroSequenceController {
   private overlay: HTMLElement | null = null;
@@ -15,6 +21,9 @@ export class IntroSequenceController {
 
   private isRunning = false;
   private isFinished = false;
+  private layoutLocked = false;
+
+  constructor(private readonly options: IntroSequenceOptions = {}) {}
 
   private boundPointerHandler = (e: Event) => this.handleTrigger(e);
   private boundKeyHandler = (e: KeyboardEvent) => this.handleKeyTrigger(e);
@@ -30,6 +39,8 @@ export class IntroSequenceController {
 
     this.promptWrap = rootElement.querySelector('.intro-prompt-wrap');
     this.terminalLog = rootElement.querySelector('.intro-terminal-log');
+    const maxCols = Math.max(0, ...this.commandRunner.getCommandSequence().map((c) => c.text.length));
+    if (maxCols > 0) this.terminalLog?.style.setProperty?.('--log-cols', String(maxCols));
     this.targetHero = targetHero || (typeof document !== 'undefined' ? document.getElementById('wfHeroName') : null);
     this.heroTraceSvg = heroTraceSvg || (typeof document !== 'undefined' ? (document.getElementById('heroTraceSvg') as SVGElement | null) : null);
 
@@ -45,6 +56,8 @@ export class IntroSequenceController {
 
   private handleTrigger(e: Event): void {
     e.stopPropagation();
+    // Must run synchronously in the gesture so iOS lets timer-driven ticks play.
+    tactileAudio.unlock();
     if (!this.isRunning && !this.isFinished) {
       void this.triggerSequence();
     } else if (this.isRunning && !this.isFinished) {
@@ -54,6 +67,7 @@ export class IntroSequenceController {
 
   private handleKeyTrigger(e: KeyboardEvent): void {
     if (e.repeat) return;
+    tactileAudio.unlock();
     if (!this.isRunning && !this.isFinished) {
       void this.triggerSequence();
     } else if (this.isRunning && !this.isFinished) {
@@ -64,6 +78,7 @@ export class IntroSequenceController {
   public async triggerSequence(): Promise<void> {
     if (this.isRunning || this.isFinished) return;
     this.isRunning = true;
+    this.lockLayout();
 
     if (this.promptWrap) {
       this.promptWrap.style.display = 'none';
@@ -108,7 +123,7 @@ export class IntroSequenceController {
     }
 
     // Trace the outline of each character in-place
-    await this.outlineTracer.startTrace();
+    await this.outlineTracer.startTrace(undefined, () => this.releaseLayout());
 
     this.finish();
   }
@@ -120,10 +135,24 @@ export class IntroSequenceController {
     this.finish();
   }
 
+  private lockLayout(): void {
+    if (this.layoutLocked || !this.options.layoutAdapter) return;
+    this.options.layoutAdapter.lock();
+    this.layoutLocked = true;
+  }
+
+  /** Idempotent: applies any layout change requested while the intro held the lock. */
+  private releaseLayout(): void {
+    if (!this.layoutLocked) return;
+    this.layoutLocked = false;
+    this.options.layoutAdapter?.release();
+  }
+
   private finish(): void {
     if (this.isFinished) return;
     this.isFinished = true;
     this.isRunning = false;
+    this.releaseLayout();
 
     if (this.overlay) {
       this.overlay.style.opacity = '0';
@@ -136,6 +165,7 @@ export class IntroSequenceController {
   }
 
   public dispose(): void {
+    this.releaseLayout();
     this.commandRunner.cancel();
     this.outlineTracer.dispose();
     if (this.overlay) {

@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { IntroSequenceController } from './IntroSequenceController';
+import { tactileAudio } from './TactileAudio';
+import { createViewportLayoutAdapter } from './ViewportLayoutAdapter';
 
 describe('IntroSequenceController', () => {
   let mockOverlay: any;
@@ -61,6 +63,26 @@ describe('IntroSequenceController', () => {
     expect(mockOverlay.addEventListener).toHaveBeenCalledWith('pointerdown', expect.any(Function));
   });
 
+  it('resumes the audio context synchronously inside the overlay pointerdown', () => {
+    const unlock = vi.spyOn(tactileAudio, 'unlock').mockImplementation(() => {});
+    const controller = new IntroSequenceController();
+    controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+
+    const handler = mockOverlay.addEventListener.mock.calls.find((c: any[]) => c[0] === 'pointerdown')[1];
+    handler({ stopPropagation: vi.fn() });
+
+    expect(unlock).toHaveBeenCalledTimes(1);
+    controller.dispose();
+  });
+
+  it('sets --log-cols to the longest boot line', () => {
+    const controller = new IntroSequenceController();
+    mockLog.style.setProperty = vi.fn();
+    controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+    const max = Math.max(...controller['commandRunner'].getCommandSequence().map((c) => c.text.length));
+    expect(mockLog.style.setProperty).toHaveBeenCalledWith('--log-cols', String(max));
+  });
+
   it('runs the sequence and invokes onFinish when complete', async () => {
     const controller = new IntroSequenceController();
     controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
@@ -83,4 +105,109 @@ describe('IntroSequenceController', () => {
     expect(mockOverlay.classList.add).toHaveBeenCalledWith('is-fading');
     expect(onFinish).toHaveBeenCalled();
   });
+
+  describe('layout lock', () => {
+    const makeAdapter = () => ({
+      decision: { nameLayout: 'stacked' } as any,
+      subscribe: vi.fn(),
+      lock: vi.fn(),
+      release: vi.fn(() => 'single-line' as const),
+    });
+
+    it('locks at intro start and releases once at hero materialization', async () => {
+      const adapter = makeAdapter();
+      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      expect(adapter.lock).not.toHaveBeenCalled();
+
+      const run = controller.triggerSequence();
+      expect(adapter.lock).toHaveBeenCalledTimes(1);
+      expect(adapter.release).not.toHaveBeenCalled();
+
+      await vi.runAllTimersAsync();
+      await run;
+      expect(adapter.release).toHaveBeenCalledTimes(1);
+      expect(adapter.lock.mock.invocationCallOrder[0]).toBeLessThan(adapter.release.mock.invocationCallOrder[0]);
+    });
+
+    it('releases when the tracer reports materialization, before the trace promise resolves', async () => {
+      const adapter = makeAdapter();
+      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      const tracer = controller['outlineTracer'];
+      let releasedAtMaterialize = false;
+      vi.spyOn(tracer, 'startTrace').mockImplementation(async (_d, cb) => {
+        expect(adapter.release).not.toHaveBeenCalled();
+        cb?.();
+        releasedAtMaterialize = adapter.release.mock.calls.length === 1;
+      });
+      const run = controller.triggerSequence();
+      await vi.runAllTimersAsync();
+      await run;
+      expect(releasedAtMaterialize).toBe(true);
+      expect(adapter.release).toHaveBeenCalledTimes(1);
+    });
+
+    it('applies a mid-intro layout change only on release', async () => {
+      const s = lockHarness();
+      const controller = new IntroSequenceController({ layoutAdapter: s.adapter });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      const run = controller.triggerSequence();
+
+      s.resize(812, 375); // rotate mid-intro
+      expect(s.attrs.nameLayout).toBe('stacked');
+
+      await vi.runAllTimersAsync();
+      await run;
+      expect(s.attrs.nameLayout).toBe('single-line');
+    });
+
+    it('releases immediately when reduced motion skips the intro', async () => {
+      vi.stubGlobal('window', {
+        matchMedia: () => ({ matches: true }),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      });
+      const adapter = makeAdapter();
+      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      await controller.triggerSequence();
+      expect(adapter.lock).toHaveBeenCalledTimes(1);
+      expect(adapter.release).toHaveBeenCalledTimes(1);
+      vi.unstubAllGlobals();
+    });
+
+    it('releases when the intro is skipped mid-run and never releases twice', async () => {
+      const adapter = makeAdapter();
+      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      void controller.triggerSequence();
+      controller.skipToEnd();
+      controller.skipToEnd();
+      controller.dispose();
+      expect(adapter.release).toHaveBeenCalledTimes(1);
+    });
+  });
 });
+
+function lockHarness() {
+  const attrs: Record<string, string> = {};
+  const winListeners: Record<string, Array<() => void>> = {};
+  const win = {
+    innerWidth: 375,
+    innerHeight: 812,
+    matchMedia: () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }),
+    addEventListener: (t: string, l: () => void) => (winListeners[t] ??= []).push(l),
+    removeEventListener: vi.fn(),
+  };
+  const adapter = createViewportLayoutAdapter(win as unknown as Window, { dataset: attrs } as unknown as HTMLElement);
+  return {
+    adapter,
+    attrs,
+    resize(w: number, h: number) {
+      win.innerWidth = w;
+      win.innerHeight = h;
+      winListeners['resize']?.forEach((l) => l());
+    },
+  };
+}
