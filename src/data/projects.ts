@@ -85,7 +85,7 @@ export interface ProjectEntry {
 
 export const PROJECTS: readonly ProjectEntry[] = [
   { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', stage: { medium: 'unity-webgl', buildPath: 'kcc/index.html', videoUrl: '', maxBuildMB: 15 }, slots: {
-  "controlsNotes": "Sample: WASD to move, Space to jump, mouse to look.",
+  "controlsNotes": "WASD to move, Space to jump, mouse to look.",
   "category": "Game",
   "title": "Kinematic Character Controller",
   "tags": [
@@ -164,14 +164,14 @@ export const PROJECTS: readonly ProjectEntry[] = [
   "category": "Concept",
   "title": "Drone Desktop",
   "tags": [
-    "Three.js",
-    "TypeScript",
-    "Audio"
+    "HTML",
+    "CSS",
+    "JavaScript"
   ],
-  "summary": "Sample text. A flight-themed companion site: take off from a transmitter and climb through clouds into open sky.",
+  "summary": "A comprehensive tool to keep track of everything needed as a drone pilot all in one place.",
   "links": {
-    "source": "https://github.com/TheJungleJimRuss",
-    "live": "https://example.com"
+    "source": "https://github.com/TheJungleJimRuss/DroneDesktop",
+    "live": "https://thejunglejimruss.github.io/DroneDesktop/"
   },
   "specs": [
     {
@@ -225,7 +225,7 @@ export const PROJECTS: readonly ProjectEntry[] = [
   }
 } },
   { slug: 'photography-portfolio', name: 'Photography Portfolio', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/Photography-Portfolio/' }, slots: {
-  "controlsNotes": "Sample: scroll and click through the gallery.",
+  "controlsNotes": "scroll and click through the gallery.",
   "category": "Web",
   "title": "Photography Portfolio",
   "tags": [
@@ -233,10 +233,10 @@ export const PROJECTS: readonly ProjectEntry[] = [
     "CSS",
     "JavaScript"
   ],
-  "summary": "Sample text. A fast, image-first portfolio site with a clean grid and full-screen viewing.",
+  "summary": "An image first portfolio site for a commercial and wedding photographer.",
   "links": {
-    "source": "https://github.com/TheJungleJimRuss",
-    "live": "https://example.com"
+    "source": "https://github.com/TheJungleJimRuss/Photography-Portfolio/",
+    "live": "https://thejunglejimruss.github.io/Photography-Portfolio/"
   },
   "specs": [
     {
@@ -290,7 +290,7 @@ export const PROJECTS: readonly ProjectEntry[] = [
   }
 } },
   { slug: 'music-studio-website', name: 'Music Studio Website', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/AlcoveSite/' }, slots: {
-  "controlsNotes": "Sample: scroll to explore; links open the booking page.",
+  "controlsNotes": "Explore the site",
   "category": "Web",
   "title": "Music Studio Website",
   "tags": [
@@ -298,10 +298,10 @@ export const PROJECTS: readonly ProjectEntry[] = [
     "CSS",
     "JavaScript"
   ],
-  "summary": "Sample text. A clear, welcoming site for a small recording studio: services, gear and how to book.",
+  "summary": "A creative and friendly site for an indie recording studio and music producer.",
   "links": {
-    "source": "https://github.com/TheJungleJimRuss",
-    "live": "https://example.com"
+    "source": "https://github.com/TheJungleJimRuss/AlcoveSite/",
+    "live": "https://thejunglejimruss.github.io/AlcoveSite/"
   },
   "specs": [
     {
