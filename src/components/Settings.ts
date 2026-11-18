@@ -4,7 +4,7 @@
  * `data-phosphor` before first paint: keep its key name and JSON shape (`{ v, settings: { phosphor, crt } }`) in sync.
  */
 
-export type ScreensaverKind = 'letterDrift' | 'lineTrace' | 'bouncingName' | 'dronePatrol' | 'none';
+export type ScreensaverKind = 'letterDrift' | 'lineTrace' | 'bouncingName' | 'none';
 export type IdleWait = 30 | 60 | 300; // seconds
 export type PhosphorColor = 'green' | 'amber' | 'white' | 'blue';
 /** The CRT filter is on or off; it has one look (the former High step). */
@@ -26,7 +26,7 @@ export interface SettingsStorage {
 export const SETTINGS_KEY = 'portfolio.dev.settings';
 const VERSION = 1;
 
-export const SCREENSAVERS: readonly ScreensaverKind[] = ['letterDrift', 'lineTrace', 'bouncingName', 'dronePatrol', 'none'];
+export const SCREENSAVERS: readonly ScreensaverKind[] = ['letterDrift', 'lineTrace', 'bouncingName', 'none'];
 export const IDLE_WAITS: readonly IdleWait[] = [30, 60, 300];
 export const PHOSPHORS: readonly PhosphorColor[] = ['green', 'amber', 'white', 'blue'];
 export const CRT_FILTERS: readonly CrtFilter[] = ['on', 'off'];
@@ -34,7 +34,7 @@ export const CRT_FILTERS: readonly CrtFilter[] = ['on', 'off'];
 const LEGACY_CRT_ON = ['low', 'med', 'high'];
 
 export const DEFAULT_SETTINGS: Settings = Object.freeze({
-  screensaver: 'letterDrift',
+  screensaver: 'lineTrace',
   wait: 60,
   phosphor: 'green',
   crt: 'on',

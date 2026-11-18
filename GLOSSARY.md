@@ -65,7 +65,7 @@ The Desktop window that holds the ways to reach the owner.
 _Avoid_: Contact page, contact form
 
 **Screensaver**:
-What the Desktop shows after the visitor has been idle for their chosen wait: one of Letter drift (the default, the Hero name's letters drifting apart over black), Line trace, Bouncing name or Drone patrol, until the visitor returns. A playing Project stage holds it off.
+What the Desktop shows after the visitor has been idle for their chosen wait: one of Letter drift (the default, the Hero name's letters drifting apart over black), Line trace or Bouncing name, until the visitor returns. A playing Project stage holds it off.
 _Avoid_: Idle mode, sleep, attract mode
 
 **Settings panel**:

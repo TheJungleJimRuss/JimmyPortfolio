@@ -31,8 +31,8 @@ const throwing: SettingsStorage = {
 };
 
 describe('DEFAULT_SETTINGS', () => {
-  it('is letterDrift / 60 / green / CRT on', () => {
-    expect(DEFAULT_SETTINGS).toEqual({ screensaver: 'letterDrift', wait: 60, phosphor: 'green', crt: 'on' });
+  it('is lineTrace / 60 / green / CRT on', () => {
+    expect(DEFAULT_SETTINGS).toEqual({ screensaver: 'lineTrace', wait: 60, phosphor: 'green', crt: 'on' });
   });
 });
 
@@ -69,7 +69,7 @@ describe('parseSettings', () => {
 
 describe('serializeSettings', () => {
   it('round-trips every value', () => {
-    const s: Settings = { screensaver: 'dronePatrol', wait: 30, phosphor: 'white', crt: 'off' };
+    const s: Settings = { screensaver: 'lineTrace', wait: 30, phosphor: 'white', crt: 'off' };
     expect(parseSettings(serializeSettings(s))).toEqual(s);
   });
 

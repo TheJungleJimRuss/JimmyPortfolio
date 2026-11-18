@@ -11,13 +11,11 @@ import type { SaverViewport } from './savers/SaverMotion';
 import { letterDriftView } from './savers/LetterDriftView';
 import { lineTraceView } from './savers/LineTraceView';
 import { bouncingNameView } from './savers/BouncingNameView';
-import { dronePatrolView } from './savers/DronePatrolView';
 
 const RENDERERS: Partial<Record<ScreensaverKind, SaverRenderer<any>>> = {
   letterDrift: letterDriftView,
   lineTrace: lineTraceView,
   bouncingName: bouncingNameView,
-  dronePatrol: dronePatrolView,
 };
 
 export interface SaverSession {
