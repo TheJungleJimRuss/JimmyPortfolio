@@ -13,7 +13,10 @@ import { slugFromWindowId } from './components/ProjectModel';
 import { IntroSequenceController } from './components/IntroSequenceController';
 import { DeepLinkHistory, parseDeepLink } from './components/DeepLink';
 import { PROJECTS } from './data/projects';
+import { createDesktopTraceView } from './components/DesktopTraceView';
 import { createViewportLayoutAdapter } from './components/ViewportLayoutAdapter';
+import { mountPowerMenu } from './components/PowerMenu';
+import { tactileAudio } from './components/TactileAudio';
 
 // Enforce manual scroll restoration so reloading always starts at the top
 if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
@@ -30,7 +33,7 @@ resetToInitialViewport();
 
 if (typeof window !== 'undefined') {
   window.addEventListener('pageshow', () => {
-    document.body.classList.remove('page-is-exiting');
+    document.body.classList.remove('page-is-exiting', 'is-powering-off');
     resetToInitialViewport();
   });
   window.addEventListener('beforeunload', () => {
@@ -38,17 +41,38 @@ if (typeof window !== 'undefined') {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Admin mode: dev build only (stripped from production), switched on by ?admin=1. The saved draft is applied
+  // to the data before any window is created.
+  let mountAdmin: (() => void) | null = null;
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('admin') === '1') {
+    const admin = await import('./admin');
+    admin.applyAdminDraft();
+    mountAdmin = admin.mountAdmin;
+  }
   const layoutAdapter = createViewportLayoutAdapter();
   resetToInitialViewport();
 
-  document.getElementById('navGatewayBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    document.body.classList.add('page-is-exiting');
-    setTimeout(() => {
-      window.location.href = './index.html';
-    }, 160);
-  });
+  const powerBtn = document.getElementById('powerBtn');
+  const powerMenu = document.getElementById('powerMenu');
+  if (powerBtn instanceof HTMLButtonElement && powerMenu) {
+    mountPowerMenu(
+      { trigger: powerBtn, menu: powerMenu },
+      {
+        onExit(action, reduced) {
+          if (action === 'shutdown' && !reduced) {
+            tactileAudio.playImpulse();
+            document.body.classList.add('is-powering-off');
+          } else {
+            document.body.classList.add('page-is-exiting');
+          }
+        },
+        navigate(url) {
+          window.location.href = url;
+        },
+      },
+    );
+  }
 
   const root = document.getElementById('desktop');
   const surface = document.getElementById('deskSurface');
@@ -85,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   );
   desktop.mount();
+  mountAdmin?.();
   deepLinkHistory = new DeepLinkHistory(() => desktop.dispatch({ type: 'back' }));
   heroSource?.remove();
 
@@ -93,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroTraceSvg = document.getElementById('heroTraceSvg') as SVGElement | null;
   if (!introOverlay || !heroNameEl || !heroTraceSvg) {
     desktop.reveal();
+    desktop.openDeepLink();
     return;
   }
 
@@ -102,15 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   introOverlay.style.opacity = '1';
   introOverlay.classList.remove('is-fading');
 
-  const promptWrap = introOverlay.querySelector<HTMLElement>('.intro-prompt-wrap');
-  if (promptWrap) promptWrap.style.display = 'none';
-  const terminalLog = introOverlay.querySelector<HTMLElement>('.intro-terminal-log');
-  if (terminalLog) {
-    terminalLog.innerHTML = '';
-    terminalLog.classList.remove('is-active');
-  }
-
-  // The Layout lock covers the whole Desktop: it holds from trace start until the hero materializes,
+  // The Layout lock covers the whole Desktop: it holds from handover to the trace until the hero materializes,
   // and the Desktop becomes visible at that moment.
   const introLayout = {
     get decision() {
@@ -128,7 +146,19 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   };
 
-  const introController = new IntroSequenceController({ layoutAdapter: introLayout });
-  introController.mount(introOverlay, () => desktop.reveal(), heroNameEl, heroTraceSvg);
-  void introController.triggerSequence();
+  const introController = new IntroSequenceController({
+    layoutAdapter: introLayout,
+    desktopTrace: createDesktopTraceView(root, () => desktop.getState().layout),
+  });
+  // Waits at the Boot shell prompt on every visit until the first key, click or tap. The deep-linked
+  // window opens once the bloom has finished.
+  introController.mount(
+    introOverlay,
+    () => {
+      desktop.reveal();
+      desktop.openDeepLink();
+    },
+    heroNameEl,
+    heroTraceSvg,
+  );
 });

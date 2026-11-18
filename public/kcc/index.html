@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
+    <title>WebGL Controller Showcase | Portfolio Showcase</title>
+    <style>
+      :root {
+        --color-bg-base: #090d16;
+        --color-bg-card: rgba(22, 27, 34, 0.85);
+        --color-accent-start: #38ef7d;
+        --color-accent-end: #11998e;
+        --color-text-primary: #f0f6fc;
+        --color-text-secondary: #8b949e;
+        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--color-bg-base);
+        font-family: var(--font-stack);
+        color: var(--color-text-primary);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: default;
+        outline: none;
+      }
+
+      #unity-canvas:focus-visible {
+        box-shadow: inset 0 0 0 2px rgba(56, 239, 125, 0.6);
+      }
+
+      #loading-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, #161b22 0%, #090d16 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+      }
+
+      #loading-overlay[inert] {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .loading-title {
+        color: var(--color-text-primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+      }
+
+      .loading-subtitle {
+        color: var(--color-text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 24px;
+      }
+
+      .progress-container {
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .progress-bar-bg {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-accent-start), var(--color-accent-end));
+        border-radius: 999px;
+        transition: width 0.15s ease-out;
+      }
+
+      .progress-text {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        font-variant-numeric: tabular-nums;
+      }
+
+      #fullscreen-btn {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        width: 38px;
+        height: 38px;
+        background: var(--color-bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        color: var(--color-text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 5;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
+      }
+
+      #fullscreen-btn:hover {
+        background: rgba(48, 54, 61, 0.95);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: scale(1.06);
+      }
+
+      #fullscreen-btn:focus-visible {
+        outline: 2px solid var(--color-accent-start);
+        outline-offset: 2px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .progress-bar-fill, #fullscreen-btn, #loading-overlay {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="unity-container">
+      <canvas 
+        id="unity-canvas" 
+        tabindex="0" 
+        role="application" 
+        aria-label="Interactive 3D Character Controller Experience">
+      </canvas>
+      
+      <div id="loading-overlay" role="status" aria-live="polite">
+        <h1 class="loading-title">WebGL Controller Showcase</h1>
+        <p class="loading-subtitle">Loading Interactive Demo...</p>
+        <div class="progress-container">
+          <div class="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressbar-aria">
+            <div id="progress-bar-fill" class="progress-bar-fill"></div>
+          </div>
+          <span id="progress-text" class="progress-text">0%</span>
+        </div>
+      </div>
+
+      <button id="fullscreen-btn" type="button" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+      </button>
+    </main>
+
+    <script>
+      const canvas = document.querySelector("#unity-canvas");
+      const loadingOverlay = document.querySelector("#loading-overlay");
+      const progressBar = document.querySelector("#progress-bar-fill");
+      const progressBarAria = document.querySelector("#progressbar-aria");
+      const progressText = document.querySelector("#progress-text");
+      const fullscreenBtn = document.querySelector("#fullscreen-btn");
+
+      const buildUrl = "Build";
+      const loaderUrl = buildUrl + "/WebGL.loader.js";
+      const config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data",
+        frameworkUrl: buildUrl + "/WebGL.framework.js",
+        codeUrl: buildUrl + "/WebGL.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "WebGL Controller Showcase",
+        productVersion: "0.1.0",
+        // Cap DPR to 2 to prevent high-res retina displays from causing GPU thermal throttling
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        // Portfolio copy: listen for keys on the canvas only (captureAllKeyboardInput = false behaviour).
+        keyboardListeningElement: canvas,
+      };
+
+      // Portfolio copy: when embedded, report load failures to the parent Desktop instead of alert().
+      const embedded = window.parent !== window;
+      const reportFailure = (message) => {
+        if (embedded) window.parent.postMessage({ type: "kcc:error", message: String(message) }, window.location.origin);
+      };
+
+      const script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          const percent = Math.round(100 * progress);
+          progressBar.style.width = percent + "%";
+          progressBarAria.setAttribute("aria-valuenow", percent);
+          progressText.textContent = percent + "%";
+        }).then((unityInstance) => {
+          loadingOverlay.setAttribute("inert", "");
+          setTimeout(() => {
+            loadingOverlay.style.display = "none";
+          }, 450);
+
+          fullscreenBtn.addEventListener("click", () => {
+            unityInstance.SetFullscreen(1);
+          });
+
+          // Focus canvas on click so keyboard and pointer respond immediately
+          canvas.addEventListener("click", () => {
+            window.focus();
+            canvas.focus();
+          });
+        }).catch((message) => {
+          console.error("Unity WebGL Error:", message);
+          if (embedded) reportFailure(message);
+          else alert("Error loading Unity WebGL: " + message);
+        });
+      };
+      script.onerror = () => reportFailure("loader script failed to load");
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>

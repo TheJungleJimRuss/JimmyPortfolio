@@ -1,0 +1,45 @@
+/* Admin mode panel (dev build only). Phosphor green on black, no glow. */
+.adm {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 9999;
+  width: min(420px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #00ff41;
+  border: 1px solid #00ff41;
+  font: 12px/1.4 ui-monospace, Menlo, monospace;
+}
+.adm-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px; }
+.adm-title { letter-spacing: 0.12em; }
+.adm-status { margin-left: auto; opacity: 0.8; }
+.adm-btn {
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 4px 8px;
+  font: inherit;
+  cursor: pointer;
+}
+.adm-btn:hover, .adm-btn:focus-visible { background: #00ff41; color: #000; }
+.adm-body { overflow: auto; padding: 0 8px 8px; border-top: 1px solid #00ff4155; }
+.adm-note { opacity: 0.7; margin: 8px 0; }
+.adm-issues { margin: 0 0 8px; padding-left: 18px; color: #ffb000; }
+.adm-section { border: 1px solid #00ff4155; margin-bottom: 6px; padding: 4px 6px; }
+.adm-section > summary { cursor: pointer; }
+.adm-field { display: grid; gap: 2px; margin: 6px 0; }
+.adm-field input, .adm-field textarea, .adm-export {
+  width: 100%;
+  box-sizing: border-box;
+  background: #000;
+  color: #00ff41;
+  border: 1px solid #00ff4177;
+  padding: 4px;
+  font: inherit;
+}
+.adm-group { border: 1px dashed #00ff4155; margin: 6px 0; padding: 4px 6px; }
+.adm-row { border-bottom: 1px solid #00ff4133; padding-bottom: 6px; margin-bottom: 6px; }
+.adm-err { color: #ffb000; }

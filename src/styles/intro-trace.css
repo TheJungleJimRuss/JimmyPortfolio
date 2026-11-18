@@ -10,25 +10,31 @@
   --color-intro-bg: #000000;
 }
 
-/* Fullscreen terminal overlay on Dev enter */
+/* Boot shell: bare full-screen terminal, text flush top-left, no chrome. */
 .intro-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background-color: transparent;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background-color: var(--color-intro-bg);
   box-sizing: border-box;
-  /* Lets the boot log size its font from the overlay's content width (cqi) */
-  container-type: inline-size;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  overflow: hidden;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.3;
   color: var(--color-phosphor-green);
+  text-shadow: 0 0 6px var(--color-phosphor-dim);
   cursor: pointer;
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+}
+
+@media (max-width: 700px), (max-height: 500px) {
+  .intro-overlay {
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    font-size: 12px;
+  }
 }
 
 .intro-overlay.is-fading {
@@ -37,27 +43,24 @@
   pointer-events: none;
 }
 
-.intro-prompt-wrap {
-  text-align: center;
-  user-select: none;
+/* Wraps like a terminal: break anywhere, keep spaces. */
+.boot-row {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
-.intro-prompt {
-  font-size: clamp(0.9rem, 2.5vw, 1.25rem);
-  letter-spacing: 0.15em;
-  color: var(--color-phosphor-green);
-  text-shadow: 0 0 10px var(--color-phosphor-glow);
+.boot-row[hidden] {
+  display: none;
 }
 
-.intro-cursor {
+.boot-cursor {
   display: inline-block;
-  width: 0.65em;
-  height: 1.15em;
+  width: 0.6em;
+  height: 1.1em;
   background-color: var(--color-phosphor-green);
-  vertical-align: -0.15em;
-  margin-left: 6px;
-  animation: introBlink 1s infinite steps(2, start);
-  box-shadow: 0 0 8px var(--color-phosphor-glow);
+  vertical-align: text-bottom;
+  box-shadow: 0 0 6px var(--color-phosphor-glow);
+  animation: introBlink 1s infinite steps(1, start);
 }
 
 @keyframes introBlink {
@@ -65,45 +68,9 @@
   50.1%, 100% { opacity: 0; }
 }
 
-.intro-terminal-log {
-  width: 100%;
-  max-width: 680px;
-  min-height: 180px;
-  /* Longest log line is --log-cols characters (set from the command list by
-     IntroSequenceController). Monospace advance is ~0.6em, so 0.62 leaves slack.
-     Font shrinks until the longest line fits one row; never grows past 0.95rem. */
-  --log-cols: 80;
-  font-size: min(0.95rem, calc(min(100cqi, 680px) / (var(--log-cols) * 0.62)));
-  white-space: pre;
-  overflow: hidden;
-  line-height: 1.6;
-  text-align: left;
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-  pointer-events: auto;
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s ease;
-}
-
-.intro-terminal-log.is-active {
-  display: flex;
-}
-
-.intro-terminal-log.is-dissolving {
-  opacity: 0;
-  transform: translateY(-8px);
-  pointer-events: none;
-}
-
-.intro-log-line {
-  color: var(--color-phosphor-green);
-  text-shadow: 0 0 6px var(--color-phosphor-dim);
-  animation: introLineIn 0.12s ease-out forwards;
-}
-
-@keyframes introLineIn {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .boot-cursor { animation: none; }
+  .intro-overlay { transition: none; }
 }
 
 /* ==========================================================================

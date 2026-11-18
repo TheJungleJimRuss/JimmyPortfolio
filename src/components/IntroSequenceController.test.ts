@@ -5,28 +5,25 @@ import { createViewportLayoutAdapter } from './ViewportLayoutAdapter';
 
 describe('IntroSequenceController', () => {
   let mockOverlay: any;
-  let mockPrompt: any;
-  let mockLog: any;
   let mockHero: any;
   let mockSvg: any;
+  let view: { render: ReturnType<typeof vi.fn>; dispose: ReturnType<typeof vi.fn> };
   let onFinish: any;
+  let reduced: boolean;
+
+  const make = (extra: Record<string, unknown> = {}) =>
+    new IntroSequenceController({ view, reducedMotion: () => reduced, ...extra } as any);
 
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.spyOn(tactileAudio, 'unlock').mockImplementation(() => {});
+    vi.spyOn(tactileAudio, 'playTick').mockImplementation(() => {});
     onFinish = vi.fn();
+    reduced = false;
+    view = { render: vi.fn(), dispose: vi.fn() };
 
-    mockPrompt = { style: {} as any, classList: { add: vi.fn(), remove: vi.fn() } };
-    mockLog = {
-      style: {} as any,
-      classList: { add: vi.fn(), remove: vi.fn() },
-      appendChild: vi.fn(),
-    };
     mockHero = {
-      classList: {
-        add: vi.fn(),
-        remove: vi.fn(),
-        contains: vi.fn(),
-      },
+      classList: { add: vi.fn(), remove: vi.fn(), contains: vi.fn() },
       style: {},
       getBoundingClientRect: vi.fn().mockReturnValue({ top: 100, left: 185, width: 386, height: 227 }),
       parentElement: {
@@ -38,15 +35,9 @@ describe('IntroSequenceController', () => {
       classList: { add: vi.fn(), remove: vi.fn() },
       querySelectorAll: vi.fn().mockReturnValue([]),
     };
-
     mockOverlay = {
       style: {} as any,
       classList: { add: vi.fn(), remove: vi.fn() },
-      querySelector: vi.fn((selector: string) => {
-        if (selector === '.intro-prompt-wrap') return mockPrompt;
-        if (selector === '.intro-terminal-log') return mockLog;
-        return null;
-      }),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
     };
@@ -56,54 +47,172 @@ describe('IntroSequenceController', () => {
     vi.restoreAllMocks();
   });
 
-  it('mounts event listeners for click and keydown', () => {
-    const controller = new IntroSequenceController();
+  it('shows only the waiting state and runs nothing until an input arrives', async () => {
+    const controller = make();
     controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+    expect(view.render).toHaveBeenCalledTimes(1);
+    expect(view.render).toHaveBeenCalledWith(null);
 
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(view.render).toHaveBeenCalledTimes(1);
+    expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  it('mounts event listeners for pointerdown', () => {
+    const controller = make();
+    controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
     expect(mockOverlay.addEventListener).toHaveBeenCalledWith('pointerdown', expect.any(Function));
   });
 
   it('resumes the audio context synchronously inside the overlay pointerdown', () => {
-    const unlock = vi.spyOn(tactileAudio, 'unlock').mockImplementation(() => {});
-    const controller = new IntroSequenceController();
+    const controller = make();
     controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-
     const handler = mockOverlay.addEventListener.mock.calls.find((c: any[]) => c[0] === 'pointerdown')[1];
     handler({ stopPropagation: vi.fn() });
-
-    expect(unlock).toHaveBeenCalledTimes(1);
+    expect(tactileAudio.unlock).toHaveBeenCalledTimes(1);
     controller.dispose();
   });
 
-  it('sets --log-cols to the longest boot line', () => {
-    const controller = new IntroSequenceController();
-    mockLog.style.setProperty = vi.fn();
+  it('first input types the command, then prints output, then hands over by itself and finishes', async () => {
+    const controller = make();
     controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-    const max = Math.max(...controller['commandRunner'].getCommandSequence().map((c) => c.text.length));
-    expect(mockLog.style.setProperty).toHaveBeenCalledWith('--log-cols', String(max));
-  });
-
-  it('runs the sequence and invokes onFinish when complete', async () => {
-    const controller = new IntroSequenceController();
-    controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-
-    const triggerPromise = controller.triggerSequence();
+    controller.input();
     await vi.runAllTimersAsync();
-    await triggerPromise;
 
-    expect(mockLog.classList.add).toHaveBeenCalledWith('is-dissolving');
+    const frames = view.render.mock.calls.map((c) => c[0]).filter(Boolean);
+    expect(frames[0].commandChars).toBe(1);
+    expect(Math.max(...frames.map((f: any) => f.rows))).toBe(5);
     expect(mockOverlay.classList.add).toHaveBeenCalledWith('is-fading');
     expect(onFinish).toHaveBeenCalled();
   });
 
-  it('immediately skips to end on skipToEnd()', () => {
-    const controller = new IntroSequenceController();
+  it('a second input mid-print completes the output and hands over to the trace', async () => {
+    const controller = make();
+    const startTrace = vi.spyOn(controller['outlineTracer'], 'startTrace').mockResolvedValue(undefined as any);
     controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+    controller.input();
+    await vi.advanceTimersByTimeAsync(100); // mid-typing
+    expect(startTrace).not.toHaveBeenCalled();
 
-    controller.skipToEnd();
-
-    expect(mockOverlay.classList.add).toHaveBeenCalledWith('is-fading');
+    controller.input();
+    const last = view.render.mock.calls[view.render.mock.calls.length - 1][0];
+    expect(last.rows).toBe(5);
+    await vi.advanceTimersByTimeAsync(400);
+    expect(startTrace).toHaveBeenCalledTimes(1);
     expect(onFinish).toHaveBeenCalled();
+  });
+
+  it('ignores input once the trace has begun', async () => {
+    const controller = make();
+    const startTrace = vi.spyOn(controller['outlineTracer'], 'startTrace').mockImplementation(() => new Promise(() => {}));
+    controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+    controller.input();
+    controller.input();
+    await vi.advanceTimersByTimeAsync(400);
+    controller.input();
+    controller.input();
+    expect(startTrace).toHaveBeenCalledTimes(1);
+    expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  it('ignores key repeats and modifier chords', () => {
+    const controller = make();
+    controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+    controller['boundKeyHandler']({ repeat: true } as KeyboardEvent);
+    controller['boundKeyHandler']({ metaKey: true } as KeyboardEvent);
+    expect(controller['phase']).toBe('waiting');
+    controller['boundKeyHandler']({} as KeyboardEvent);
+    expect(controller['phase']).toBe('printing');
+    controller.dispose();
+  });
+
+  describe('reduced motion', () => {
+    it('waits, then shows all output at once, with no trace', async () => {
+      reduced = true;
+      const controller = make();
+      const startTrace = vi.spyOn(controller['outlineTracer'], 'startTrace');
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(onFinish).not.toHaveBeenCalled();
+
+      controller.input();
+      expect(view.render).toHaveBeenCalledTimes(2);
+      expect(view.render.mock.calls[1][0]).toMatchObject({ commandChars: 25, rows: 5 });
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(onFinish).not.toHaveBeenCalled(); // still showing the output, waiting for a second input
+
+      controller.input();
+      await vi.runAllTimersAsync();
+      expect(onFinish).toHaveBeenCalledTimes(1);
+      expect(startTrace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('desktop outline trace', () => {
+    const makeTrace = (layout: 'desktop' | 'phone' = 'desktop') => ({
+      layout: vi.fn(() => layout),
+      play: vi.fn((_steps: readonly { part: string }[]) => Promise.resolve()),
+      finish: vi.fn(),
+    });
+
+    it('draws the Desktop parts first, then the 1.8s name trace, then finishes the trace', async () => {
+      const trace = makeTrace();
+      const controller = make({ desktopTrace: trace });
+      const order: string[] = [];
+      trace.play.mockImplementation(() => {
+        order.push('desktop');
+        return Promise.resolve();
+      });
+      vi.spyOn(controller['outlineTracer'], 'startTrace').mockImplementation(async (d) => {
+        order.push(`name:${d}`);
+      });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      controller.input();
+      controller.input();
+      await vi.runAllTimersAsync();
+
+      expect(order).toEqual(['desktop', 'name:1800']);
+      expect(trace.play.mock.calls[0]![0].map((s) => s.part)).toEqual(['taskbar', 'icons', 'explorer', 'hero']);
+      expect(trace.finish).toHaveBeenCalledTimes(1);
+      expect(onFinish).toHaveBeenCalledTimes(1);
+    });
+
+    it('traces the phone parts when the Layout lock holds the phone layout', async () => {
+      const trace = makeTrace('phone');
+      const controller = make({ desktopTrace: trace });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      controller.input();
+      controller.input();
+      await vi.runAllTimersAsync();
+      expect(trace.play.mock.calls[0]![0].map((s) => s.part)).toEqual(['taskbar', 'hero']);
+    });
+
+    it('shows the finished Desktop with no trace for reduced motion', async () => {
+      reduced = true;
+      const trace = makeTrace();
+      const controller = make({ desktopTrace: trace });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      controller.input();
+      controller.input();
+      await vi.runAllTimersAsync();
+      expect(trace.play).not.toHaveBeenCalled();
+      expect(trace.finish).toHaveBeenCalledTimes(1);
+      expect(onFinish).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores input while the Desktop parts draw', async () => {
+      const trace = makeTrace();
+      trace.play.mockImplementation(() => new Promise(() => {}));
+      const controller = make({ desktopTrace: trace });
+      controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      controller.input();
+      controller.input();
+      await vi.advanceTimersByTimeAsync(400);
+      controller.input();
+      controller.input();
+      expect(trace.play).toHaveBeenCalledTimes(1);
+      expect(onFinish).not.toHaveBeenCalled();
+    });
   });
 
   describe('layout lock', () => {
@@ -114,74 +223,71 @@ describe('IntroSequenceController', () => {
       release: vi.fn(() => 'single-line' as const),
     });
 
-    it('locks at intro start and releases once at hero materialization', async () => {
+    const handOver = (c: IntroSequenceController) => {
+      c.input();
+      c.input();
+    };
+
+    it('does not lock while waiting; locks at the handover and releases once at hero materialization', async () => {
       const adapter = makeAdapter();
-      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      const controller = make({ layoutAdapter: adapter });
       controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
+      controller.input();
       expect(adapter.lock).not.toHaveBeenCalled();
 
-      const run = controller.triggerSequence();
+      controller.input();
       expect(adapter.lock).toHaveBeenCalledTimes(1);
       expect(adapter.release).not.toHaveBeenCalled();
 
       await vi.runAllTimersAsync();
-      await run;
       expect(adapter.release).toHaveBeenCalledTimes(1);
       expect(adapter.lock.mock.invocationCallOrder[0]).toBeLessThan(adapter.release.mock.invocationCallOrder[0]);
     });
 
     it('releases when the tracer reports materialization, before the trace promise resolves', async () => {
       const adapter = makeAdapter();
-      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      const controller = make({ layoutAdapter: adapter });
       controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-      const tracer = controller['outlineTracer'];
       let releasedAtMaterialize = false;
-      vi.spyOn(tracer, 'startTrace').mockImplementation(async (_d, cb) => {
+      vi.spyOn(controller['outlineTracer'], 'startTrace').mockImplementation(async (_d, cb) => {
         expect(adapter.release).not.toHaveBeenCalled();
         cb?.();
         releasedAtMaterialize = adapter.release.mock.calls.length === 1;
       });
-      const run = controller.triggerSequence();
+      handOver(controller);
       await vi.runAllTimersAsync();
-      await run;
       expect(releasedAtMaterialize).toBe(true);
       expect(adapter.release).toHaveBeenCalledTimes(1);
     });
 
-    it('applies a mid-intro layout change only on release', async () => {
+    it('applies a mid-trace layout change only on release', async () => {
       const s = lockHarness();
-      const controller = new IntroSequenceController({ layoutAdapter: s.adapter });
+      const controller = make({ layoutAdapter: s.adapter });
       controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-      const run = controller.triggerSequence();
+      handOver(controller);
 
       s.resize(812, 375); // rotate mid-intro
       expect(s.attrs.nameLayout).toBe('stacked');
 
       await vi.runAllTimersAsync();
-      await run;
       expect(s.attrs.nameLayout).toBe('single-line');
     });
 
-    it('releases immediately when reduced motion skips the intro', async () => {
-      vi.stubGlobal('window', {
-        matchMedia: () => ({ matches: true }),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      });
+    it('locks and releases at once when reduced motion hands over to the finished Desktop', async () => {
+      reduced = true;
       const adapter = makeAdapter();
-      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      const controller = make({ layoutAdapter: adapter });
       controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-      await controller.triggerSequence();
+      handOver(controller);
       expect(adapter.lock).toHaveBeenCalledTimes(1);
       expect(adapter.release).toHaveBeenCalledTimes(1);
-      vi.unstubAllGlobals();
     });
 
-    it('releases when the intro is skipped mid-run and never releases twice', async () => {
+    it('never releases twice when skipped and disposed', () => {
       const adapter = makeAdapter();
-      const controller = new IntroSequenceController({ layoutAdapter: adapter });
+      const controller = make({ layoutAdapter: adapter });
       controller.mount(mockOverlay, onFinish, mockHero, mockSvg);
-      void controller.triggerSequence();
+      handOver(controller);
       controller.skipToEnd();
       controller.skipToEnd();
       controller.dispose();

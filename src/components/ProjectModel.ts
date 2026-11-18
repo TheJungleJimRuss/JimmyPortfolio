@@ -143,7 +143,7 @@ export interface StageLink {
 }
 
 /** Fixed chrome labels for the keyboard hint. */
-export const KEYBOARD_HINT = { game: 'Keyboard: game', desktop: 'Keyboard: desktop' } as const;
+export const KEYBOARD_HINT = { game: 'Keyboard: game (Shift+Esc to leave)', desktop: 'Keyboard: desktop' } as const;
 export type KeyboardOwner = keyof typeof KEYBOARD_HINT;
 
 /** The game owns the keyboard only while the stage iframe is the focused element. */

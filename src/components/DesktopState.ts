@@ -12,6 +12,8 @@ export interface WindowState {
   minimized: boolean;
   maximized: boolean;
   position: Position;
+  /** User-chosen size; absent means the window's default size. */
+  size?: { width: number; height: number };
 }
 
 export interface DesktopState {
@@ -30,6 +32,7 @@ export type DesktopAction =
   | { type: 'focus'; id: WindowId }
   | { type: 'minimize' | 'maximize' | 'close'; id: WindowId }
   | { type: 'move'; id: WindowId; position: Position }
+  | { type: 'resize'; id: WindowId; position: Position; size: { width: number; height: number } }
   | { type: 'loadStage'; slug: string }
   | { type: 'setLayout'; layout: DesktopLayout }
   | { type: 'back' };
@@ -196,7 +199,17 @@ function arrive(state: DesktopState, deepLink?: WindowId): DesktopState {
   return s;
 }
 
+/**
+ * Each action announces on its own: the previous announcement is cleared first, and an action that
+ * changes nothing returns the same state object it was given.
+ */
 export function reduce(state: DesktopState, action: DesktopAction): DesktopState {
+  const base = state.announcement === null ? state : { ...state, announcement: null };
+  const next = reduceAction(base, action);
+  return next === base ? state : next;
+}
+
+function reduceAction(state: DesktopState, action: DesktopAction): DesktopState {
   switch (action.type) {
     case 'arrive':
       return arrive(state, action.deepLink);
@@ -224,6 +237,15 @@ export function reduce(state: DesktopState, action: DesktopAction): DesktopState
       return {
         ...state,
         windows: state.windows.map((w) => (w.id === action.id ? { ...w, position: { ...action.position } } : w)),
+      };
+    }
+    case 'resize': {
+      if (state.layout === 'phone' || !state.windows.some((w) => w.id === action.id)) return state;
+      return {
+        ...state,
+        windows: state.windows.map((w) =>
+          w.id === action.id ? { ...w, position: { ...action.position }, size: { ...action.size } } : w,
+        ),
       };
     }
     case 'loadStage': {

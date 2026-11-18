@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { createInitialState, reduce } from './DesktopState';
 import {
   clampPosition,
+  closeFocusTargets,
+  escapeAction,
   desktopLayoutFor,
   formatClock,
   taskbarItems,
@@ -102,5 +104,56 @@ describe('formatClock', () => {
   it('pads to HH:MM', () => {
     expect(formatClock(new Date(2026, 10, 13, 7, 5))).toBe('07:05');
     expect(formatClock(new Date(2026, 10, 13, 18, 42))).toBe('18:42');
+  });
+});
+
+describe('escapeAction', () => {
+  it('leaves a stage that owns the keyboard only on Shift+Esc', () => {
+    expect(escapeAction({ stageOwnsKeyboard: true, shift: true, hasFocusedWindow: true })).toBe('leave-stage');
+  });
+  it('leaves plain Esc to the game while it owns the keyboard', () => {
+    expect(escapeAction({ stageOwnsKeyboard: true, hasFocusedWindow: true })).toBe('none');
+  });
+  it('then closes the focused window', () => {
+    expect(escapeAction({ stageOwnsKeyboard: false, hasFocusedWindow: true })).toBe('close-window');
+  });
+  it('does nothing without a focused window', () => {
+    expect(escapeAction({ stageOwnsKeyboard: false, hasFocusedWindow: false })).toBe('none');
+  });
+});
+
+describe('closeFocusTargets', () => {
+  it('returns to the icon of a main window on desktop', () => {
+    expect(closeFocusTargets('about', 'desktop', null)).toEqual([{ kind: 'icon', id: 'about' }]);
+  });
+  it('returns from a Project window to the Projects icon, then its Taskbar button', () => {
+    expect(closeFocusTargets('project:kcc', 'desktop', 'hero')).toEqual([
+      { kind: 'icon', id: 'projects' },
+      { kind: 'taskbar', id: 'hero' },
+    ]);
+  });
+  it('falls back to the Taskbar on phone, where icons are not shown', () => {
+    expect(closeFocusTargets('about', 'phone', 'hero')).toEqual([{ kind: 'taskbar', id: 'hero' }]);
+  });
+});
+
+describe('resizeRect', () => {
+  const bounds = { width: 1000, height: 700 };
+  const start = { position: { x: 100, y: 100 }, size: { width: 400, height: 300 } };
+  it('grows from the south-east corner', async () => {
+    const { resizeRect } = await import('./DesktopView');
+    expect(resizeRect(start, 'se', 50, 40, bounds).size).toEqual({ width: 450, height: 340 });
+  });
+  it('moves the origin when dragging the west edge and respects the minimum', async () => {
+    const { resizeRect, MIN_WINDOW } = await import('./DesktopView');
+    const r = resizeRect(start, 'w', 900, 0, bounds);
+    expect(r.size.width).toBe(MIN_WINDOW.width);
+    expect(r.position.x + r.size.width).toBe(500);
+  });
+  it('never leaves the surface', async () => {
+    const { resizeRect } = await import('./DesktopView');
+    const r = resizeRect(start, 'se', 5000, 5000, bounds);
+    expect(r.position.x + r.size.width).toBe(1000);
+    expect(r.position.y + r.size.height).toBe(700);
   });
 });

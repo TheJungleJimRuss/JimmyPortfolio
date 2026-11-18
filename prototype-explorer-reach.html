@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<!--
+  PROTOTYPE — throwaway. Ticket: .agents/issues/dev-portfolio-complete/issues/03-explorer-reach.md
+  Question: how far should the File Explorer reach on the Dev portfolio?
+  Three variants, switchable via ?variant=A|B|C and the bottom bar (← → keys):
+    A  Projects only: scrolling page, explorer window replaces the card grid.
+    B  Whole page as a desktop OS: Projects / About / Contact are desktop folders that open windows.
+    C  Whole page as one explorer window: sidebar holds Projects, About, Contact as top-level folders.
+  Not in vite rollup inputs, so it never ships. Intro sequence is skipped on purpose.
+  All text is existing placeholder slots from dev.html; no copy written.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<title>PROTOTYPE — Explorer reach</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@800&display=swap" />
+<style>
+  :root {
+    --g: #00ff41; --g-dim: rgba(0,255,65,.55); --g-faint: rgba(0,255,65,.14); --g-line: rgba(0,255,65,.28);
+    --bg: #000; --panel: #050805; --text: #e6efe8; --muted: #7d8a80; --hero: #f0f4f8;
+    --mono: 'JetBrains Mono', ui-monospace, monospace; --sans: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
+  body { min-height: 100dvh; }
+  .variant { display: none; } .variant.is-on { display: block; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  .mono { font-family: var(--mono); }
+  .ph { color: var(--muted); }
+  .label { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; color: var(--g-dim); text-transform: uppercase; }
+
+  /* hero (shared, stacked name as on the real Dev portfolio) */
+  .hero-name { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--hero); line-height: .9; margin: 0;
+    font-size: clamp(56px, 13vw, 168px); letter-spacing: -.01em; }
+  .hero-name span { display: block; }
+
+  /* ---------- explorer window chrome (shared look, each variant composes its own layout) ---------- */
+  .win { border: 1px solid var(--g-line); background: var(--panel); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
+  .win-bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--g-line); font-family: var(--mono); font-size: 12px; }
+  .win-dots { display: flex; gap: 6px; } .win-dots i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--g-dim); display: block; }
+  .crumbs { display: flex; gap: 6px; flex-wrap: wrap; color: var(--muted); min-width: 0; }
+  .crumbs button { color: var(--g); } .crumbs button:hover { text-decoration: underline; }
+  .win-body { display: flex; min-height: 0; flex: 1; }
+  .side { width: 180px; flex: none; border-right: 1px solid var(--g-line); padding: 10px 0; font-family: var(--mono); font-size: 13px; }
+  .side button { display: block; width: 100%; text-align: left; padding: 6px 14px; color: var(--muted); }
+  .side button.is-active, .side button:hover { color: var(--g); background: var(--g-faint); }
+  .pane { flex: 1; padding: 16px; min-width: 0; overflow: auto; }
+  .files { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .file { text-align: left; padding: 14px; border: 1px solid transparent; border-radius: 4px; font-family: var(--mono); font-size: 13px; }
+  .file:hover, .file:focus-visible { border-color: var(--g-line); background: var(--g-faint); outline: none; }
+  .file .ico { display: block; width: 44px; height: 34px; border: 1.5px solid var(--g); border-radius: 2px 8px 2px 2px; margin-bottom: 10px; position: relative; }
+  .file .ico::before { content: ''; position: absolute; top: -6px; left: -1.5px; width: 18px; height: 6px; border: 1.5px solid var(--g); border-bottom: 0; border-radius: 3px 3px 0 0; }
+  .file .ico.doc { width: 32px; height: 40px; border-radius: 2px; } .file .ico.doc::before { display: none; }
+  .file small { display: block; color: var(--muted); margin-top: 4px; font-size: 11px; }
+  .detail h3 { font-family: var(--mono); color: var(--g); margin: 0 0 10px; font-size: 16px; }
+  .stage { aspect-ratio: 16/9; border: 1px dashed var(--g-line); display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--g-dim); margin: 12px 0; }
+  .detail p { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 62ch; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; } .tag { font-family: var(--mono); font-size: 11px; border: 1px solid var(--g-line); padding: 3px 8px; border-radius: 3px; color: var(--text); }
+
+  /* ---------- A: projects only ---------- */
+  .a-wrap { max-width: 1140px; margin: 0 auto; padding: 72px 24px 120px; }
+  .a-sec { padding: 72px 0; border-bottom: 1px solid var(--g-faint); }
+  .a-sec h2 { font-family: var(--mono); color: var(--g); font-size: 13px; letter-spacing: .14em; margin: 0 0 20px; }
+  .a-explorer { height: min(620px, 80dvh); }
+  .a-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+
+  /* ---------- B: desktop OS ---------- */
+  .b-desk { position: fixed; inset: 0; overflow: hidden; background:
+      radial-gradient(circle at 70% 30%, rgba(0,255,65,.05), transparent 60%), #000; }
+  .b-hero { position: absolute; right: 5vw; bottom: 12vh; text-align: right; opacity: .9; pointer-events: none; }
+  .b-hero .hero-name { font-size: clamp(48px, 10vw, 140px); }
+  .b-icons { position: absolute; top: 24px; left: 24px; display: grid; gap: 8px; }
+  .b-icons .file { width: 110px; text-align: center; } .b-icons .file .ico { margin: 0 auto 8px; }
+  .b-win { position: absolute; width: min(760px, 70vw); height: min(520px, 68vh); box-shadow: 0 20px 60px rgba(0,0,0,.8); }
+  .b-win .win-bar { cursor: grab; user-select: none; } .b-win.is-front { border-color: var(--g-dim); }
+  .b-close { margin-left: auto; color: var(--g); padding: 0 4px; }
+  .b-taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; border-top: 1px solid var(--g-line); background: #020402;
+    display: flex; align-items: center; gap: 4px; padding: 0 12px; font-family: var(--mono); font-size: 12px; }
+  .b-taskbar button { padding: 6px 10px; border: 1px solid var(--g-faint); border-radius: 3px; }
+  .b-taskbar .b-clock { margin-left: auto; color: var(--muted); }
+
+  /* ---------- C: one explorer window is the page ---------- */
+  .c-win { position: fixed; inset: 12px; }
+  .c-home { display: grid; gap: 28px; }
+
+  /* ---------- phones ---------- */
+  @media (max-width: 700px) {
+    .side { display: none; }
+    .files { grid-template-columns: 1fr; gap: 4px; }
+    .file { display: flex; align-items: center; gap: 12px; } .file .ico { margin: 0; width: 30px; height: 22px; flex: none; }
+    .file .ico.doc { width: 22px; height: 28px; }
+    .a-cols { grid-template-columns: 1fr; }
+    .b-icons { grid-template-columns: repeat(3, 1fr); left: 12px; right: 12px; }
+    .b-icons .file { width: auto; flex-direction: column; } .b-icons .file .ico { margin: 0 auto; }
+    .b-win { inset: 0 0 40px 0 !important; width: auto; height: auto; border-radius: 0; }
+    .b-hero { left: 12px; right: 12px; bottom: 60px; }
+    .c-win { inset: 0; border-radius: 0; }
+    .c-tabs { display: flex !important; }
+  }
+  .c-tabs { display: none; border-bottom: 1px solid var(--g-line); font-family: var(--mono); font-size: 12px; overflow-x: auto; }
+  .c-tabs button { padding: 10px 14px; color: var(--muted); white-space: nowrap; } .c-tabs button.is-active { color: var(--g); box-shadow: inset 0 -2px var(--g); }
+
+  /* ---------- prototype switcher (not part of the design) ---------- */
+  .proto-bar { position: fixed; left: 50%; bottom: calc(52px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 999;
+    display: flex; align-items: center; gap: 4px; background: #fff; color: #000; border-radius: 999px; padding: 4px;
+    font: 600 13px/1 system-ui, sans-serif; box-shadow: 0 6px 24px rgba(0,0,0,.6); }
+  .proto-bar button { color: #000; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; } .proto-bar button:hover { background: #eee; }
+  .proto-bar span { padding: 0 10px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- =================== A: PROJECTS ONLY =================== -->
+<div class="variant" data-variant="A">
+  <main class="a-wrap">
+    <section style="padding: 40px 0 72px;">
+      <h1 class="hero-name"><span>JIMMY</span><span>RUSS</span></h1>
+    </section>
+    <section class="a-sec">
+      <h2>// PROJECTS</h2>
+      <div class="win a-explorer" data-explorer data-root="projects"></div>
+    </section>
+    <section class="a-sec">
+      <h2>// ABOUT</h2>
+      <div class="a-cols" data-slot="about"></div>
+    </section>
+    <section class="a-sec" style="border-bottom: 0;">
+      <h2>// CONTACT</h2>
+      <div data-slot="contact"></div>
+    </section>
+  </main>
+</div>
+
+<!-- =================== B: DESKTOP OS =================== -->
+<div class="variant" data-variant="B">
+  <div class="b-desk">
+    <div class="b-hero"><h1 class="hero-name"><span>JIMMY</span><span>RUSS</span></h1></div>
+    <div class="b-icons">
+      <button class="file" data-open="projects"><span class="ico"></span>Projects</button>
+      <button class="file" data-open="about"><span class="ico"></span>About</button>
+      <button class="file" data-open="contact"><span class="ico doc"></span>Contact</button>
+    </div>
+    <div class="b-windows"></div>
+    <div class="b-taskbar"><span class="label" style="margin-right: 8px;">JR//OS</span><span class="b-tasks"></span><span class="b-clock mono"></span></div>
+  </div>
+</div>
+
+<!-- =================== C: ONE EXPLORER WINDOW =================== -->
+<div class="variant" data-variant="C">
+  <div class="win c-win" data-explorer data-root="home"></div>
+</div>
+
+<div class="proto-bar" role="toolbar" aria-label="Prototype variant switcher">
+  <button type="button" data-step="-1" aria-label="Previous variant">&larr;</button>
+  <span id="protoLabel"></span>
+  <button type="button" data-step="1" aria-label="Next variant">&rarr;</button>
+</div>
+
+<script type="module">
+  // ---------- placeholder data (slots copied from dev.html; no new copy) ----------
+  const projects = [
+    { id: 'kcc', title: 'Kinematic Character Controller', stage: '[ 16:9 INTERACTIVE DEMO INSIDE ]', summary: '[ Short Summary Placeholder ]', tags: ['[ Unity 6 ]', '[ C# ]'] },
+    { id: 'gcs', title: 'Drone Desktop', stage: '[ DESKTOP GCS & TELEMETRY ]', summary: '[ Short Summary Placeholder ]', tags: ['[ Tag ]'] },
+    { id: 'photo', title: 'Photography Portfolio', stage: '[ HIGH-RES VISUAL GALLERY ]', summary: '[ Short Summary Placeholder ]', tags: ['[ Tag ]'] },
+    { id: 'music', title: 'Music Studio Website', stage: '[ INTERACTIVE AUDIO CONSOLE ]', summary: '[ Short Summary Placeholder ]', tags: ['[ Tag ]'] },
+  ];
+  const aboutHTML = `
+    <div><h3 class="mono" style="color:var(--g);margin:0 0 10px">[ About Me Heading Placeholder ]</h3>
+      <p class="ph">[ Bio Paragraph Placeholder ]</p><p class="ph">[ Secondary Bio / Philosophy Placeholder ]</p></div>
+    <div><h3 class="mono" style="color:var(--g);margin:0 0 10px">[ Core Technical Stack ]</h3>
+      <div class="label" style="margin:12px 0 6px">[ GAMEPLAY & PHYSICS ]</div><div class="tags"><span class="tag">[ Unity 6 ]</span><span class="tag">[ C# ]</span></div>
+      <div class="label" style="margin:12px 0 6px">[ SYSTEMS & FULL-STACK ]</div><div class="tags"><span class="tag">[ TypeScript ]</span><span class="tag">[ React ]</span></div>
+      <div class="label" style="margin:12px 0 6px">[ TOOLING & WORKFLOW ]</div><div class="tags"><span class="tag">[ Git & GitHub ]</span></div></div>`;
+  const contactHTML = `
+    <h3 class="mono" style="color:var(--g);margin:0 0 10px">[ Let’s Build Something Exceptional ]</h3>
+    <p class="ph">[ Contact Call-to-Action Copy Placeholder ]</p>
+    <div class="tags" style="margin-top:14px"><span class="tag">[ Copy Email ]</span><span class="tag">[ GitHub Profile ] ↗</span><span class="tag">[ LinkedIn Profile ] ↗</span></div>`;
+  document.querySelectorAll('[data-slot="about"]').forEach((el) => (el.innerHTML = aboutHTML));
+  document.querySelectorAll('[data-slot="contact"]').forEach((el) => (el.innerHTML = contactHTML));
+
+  // ---------- generic explorer: path is an array like ['home','projects','kcc'] ----------
+  const names = { home: '~', projects: 'projects', about: 'about', contact: 'contact' };
+  projects.forEach((p) => (names[p.id] = p.title));
+  const folderFile = (id, label, sub, doc = false) =>
+    `<button class="file" data-go="${id}"><span class="ico${doc ? ' doc' : ''}"></span>${label}${sub ? `<small>${sub}</small>` : ''}</button>`;
+
+  function paneFor(path) {
+    const here = path[path.length - 1];
+    if (here === 'home') return `<h1 class="hero-name" style="font-size:clamp(48px,9vw,128px);margin:12px 0 32px"><span>JIMMY</span><span>RUSS</span></h1><div class="files">${folderFile('projects', 'Projects', '4 items')}${folderFile('about', 'About', '')}${folderFile('contact', 'Contact', '', true)}</div>`;
+    if (here === 'projects') return `<div class="files">${projects.map((p) => folderFile(p.id, p.title, p.stage)).join('')}</div>`;
+    if (here === 'about') return `<div class="a-cols">${aboutHTML}</div>`;
+    if (here === 'contact') return contactHTML;
+    const p = projects.find((x) => x.id === here);
+    return `<div class="detail"><h3>${p.title}</h3><div class="stage">${p.stage}</div><p>${p.summary}</p>
+      <div class="tags">${p.tags.map((t) => `<span class="tag">${t}</span>`).join('')}</div>
+      <p style="margin-top:18px">[ Project Deep-Dive Summary Placeholder ]</p></div>`;
+  }
+
+  function mountExplorer(el, rootPath, { withSide = true, closable = false, onClose } = {}) {
+    let path = [...rootPath];
+    const sideItems = rootPath[0] === 'home' ? ['projects', 'about', 'contact'] : projects.map((p) => p.id);
+    function render() {
+      const crumbs = path.map((id, i) => i === path.length - 1 ? `<span>${names[id]}</span>` : `<button data-crumb="${i}">${names[id]}</button><span>/</span>`).join('');
+      const active = path[rootPath.length] ?? path[path.length - 1];
+      el.innerHTML = `
+        <div class="win-bar"><span class="win-dots"><i></i><i></i><i></i></span><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>
+          ${closable ? '<button class="b-close" data-close aria-label="Close window">✕</button>' : ''}</div>
+        ${rootPath[0] === 'home' ? `<div class="c-tabs">${sideItems.map((id) => `<button data-side="${id}" class="${active === id ? 'is-active' : ''}">${names[id]}</button>`).join('')}</div>` : ''}
+        <div class="win-body">
+          ${withSide ? `<div class="side">${sideItems.map((id) => `<button data-side="${id}" class="${active === id ? 'is-active' : ''}">${names[id]}</button>`).join('')}</div>` : ''}
+          <div class="pane">${paneFor(path)}</div></div>`;
+      document.getElementById('stateLog') && (document.getElementById('stateLog').textContent = path.join('/'));
+    }
+    el.addEventListener('click', (e) => {
+      const t = e.target.closest('button'); if (!t) return;
+      if (t.dataset.go) path = [...path, t.dataset.go];
+      else if (t.dataset.crumb) path = path.slice(0, +t.dataset.crumb + 1);
+      else if (t.dataset.side) path = [...rootPath, t.dataset.side];
+      else if (t.dataset.close) return onClose?.();
+      else return;
+      render(); console.log('[proto] path =', path.join('/'));
+    });
+    render();
+  }
+
+  // A + C
+  mountExplorer(document.querySelector('[data-variant="A"] [data-explorer]'), ['projects']);
+  mountExplorer(document.querySelector('[data-variant="C"] [data-explorer]'), ['home']);
+
+  // ---------- B: desktop windows ----------
+  const winLayer = document.querySelector('.b-windows'); const tasks = document.querySelector('.b-tasks');
+  const open = new Map(); let z = 10;
+  function front(w) { open.forEach((x) => x.classList.remove('is-front')); w.classList.add('is-front'); w.style.zIndex = ++z; }
+  function renderTasks() { tasks.innerHTML = [...open.keys()].map((k) => `<button data-task="${k}">${names[k]}</button>`).join(''); }
+  function openWin(id) {
+    if (open.has(id)) return front(open.get(id));
+    const w = document.createElement('div'); w.className = 'win b-win';
+    const n = open.size; w.style.left = `${160 + n * 36}px`; w.style.top = `${40 + n * 32}px`;
+    winLayer.append(w); open.set(id, w);
+    mountExplorer(w, [id], { withSide: id === 'projects', closable: true, onClose: () => { w.remove(); open.delete(id); renderTasks(); } });
+    w.addEventListener('pointerdown', () => front(w));
+    // drag by title bar
+    w.addEventListener('pointerdown', (e) => {
+      if (!e.target.closest('.win-bar') || e.target.closest('button') || matchMedia('(max-width:700px)').matches) return;
+      const sx = e.clientX - w.offsetLeft, sy = e.clientY - w.offsetTop;
+      const move = (m) => { w.style.left = `${m.clientX - sx}px`; w.style.top = `${Math.max(0, m.clientY - sy)}px`; };
+      const up = () => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); };
+      addEventListener('pointermove', move); addEventListener('pointerup', up);
+    });
+    front(w); renderTasks();
+  }
+  document.querySelector('.b-icons').addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) openWin(b.dataset.open); });
+  tasks.addEventListener('click', (e) => { const b = e.target.closest('[data-task]'); if (b) front(open.get(b.dataset.task)); });
+  const clock = document.querySelector('.b-clock'); const tick = () => (clock.textContent = new Date().toTimeString().slice(0, 5)); tick(); setInterval(tick, 30000);
+  openWin('projects');
+
+  // ---------- switcher ----------
+  const variants = { A: 'Projects only', B: 'Desktop OS', C: 'One explorer window' };
+  const keys = Object.keys(variants);
+  function show(k) {
+    document.querySelectorAll('.variant').forEach((v) => v.classList.toggle('is-on', v.dataset.variant === k));
+    document.getElementById('protoLabel').textContent = `${k} (${variants[k]})`;
+    const u = new URL(location.href); u.searchParams.set('variant', k); history.replaceState(null, '', u);
+    console.log('[proto] variant =', k);
+  }
+  let cur = keys.includes(new URLSearchParams(location.search).get('variant')) ? new URLSearchParams(location.search).get('variant') : 'A';
+  const step = (d) => { cur = keys[(keys.indexOf(cur) + d + keys.length) % keys.length]; show(cur); };
+  document.querySelector('.proto-bar').addEventListener('click', (e) => { const b = e.target.closest('[data-step]'); if (b) step(+b.dataset.step); });
+  addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea, [contenteditable]')) return;
+    if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(1);
+  });
+  show(cur);
+</script>
+</body>
+</html>

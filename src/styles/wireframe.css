@@ -77,107 +77,9 @@ li {
   text-wrap: pretty;
 }
 
-.wf-label {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-label);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-wire);
-  padding: 3px 8px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-}
-
-.wf-box {
-  background: var(--bg-box);
-  border: 1px solid var(--border-wire);
-  border-radius: 8px;
-  padding: 24px;
-}
-
-.wf-placeholder {
-  background: var(--bg-slot);
-  border: 1.5px dashed var(--border-dashed);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 24px;
-  color: var(--text-label);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  gap: 6px;
-}
-
-.wf-copy-placeholder {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.86rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed var(--border-dashed);
-  border-radius: 6px;
-  padding: 12px 16px;
-}
-
-.wf-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px 20px;
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  text-decoration: none;
-  border: 1px solid var(--border-wire);
-  background: var(--bg-box);
-  color: var(--text-main);
-  cursor: pointer;
-  transition: border-color 0.18s ease, background-color 0.18s ease;
-}
-
-.wf-btn:hover {
-  border-color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.wf-btn-primary {
-  background: var(--text-main);
-  color: var(--bg-page);
-  border-color: var(--text-main);
-  font-weight: 600;
-}
-
-.wf-btn-primary:hover {
-  background: #ffffff;
-}
-
-.wf-tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.wf-tag {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  padding: 3px 8px;
-  border: 1px solid var(--border-wire);
-  border-radius: 4px;
-  background: var(--bg-slot);
-}
-
 /* ==========================================================================
    1. FULL-VIEWPORT MINIMAL HERO HEADER
    ========================================================================== */
-
-/* Fixed Gateway back-link: clears notch / safe areas, 44px tap target */
 
 .wf-hero-inner {
   width: 100%;
@@ -207,14 +109,6 @@ li {
 }
 
 /* ==========================================================================
-   2. SELECTED PROJECTS GRID (SIMPLE DISPLAY)
-   ========================================================================== */
-
-/* ==========================================================================
-   3. DEDICATED PROJECT DETAIL VIEW (DEEP DIVE PAGE)
-   ========================================================================== */
-
-/* ==========================================================================
    VIEW TRANSITIONS API (same-document-transitions guidance)
    ========================================================================== */
 ::view-transition-old(root),
@@ -228,103 +122,6 @@ li {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
-  }
-}
-
-/* ==========================================================================
-   4. ABOUT & SKILLS
-   ========================================================================== */
-
-/* ==========================================================================
-   5. CONTACT & SOCIALS
-   ========================================================================== */
-
-/* ==========================================================================
-   6. FLOATING TOP CENTER PERSONA PILL TOGGLE
-   ========================================================================== */
-.wf-floating-toggle-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-}
-
-.wf-floating-toggle-container[hidden] {
-  display: none !important;
-}
-
-.wf-persona-toggle-group {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(19, 22, 28, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border-wire);
-  border-radius: 24px;
-  padding: 4px;
-  gap: 3px;
-  pointer-events: auto;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.wf-persona-pill {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  padding: 6px 14px;
-  border-radius: 16px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.wf-persona-pill:hover {
-  color: var(--text-main);
-}
-
-.wf-persona-pill.is-active {
-  background: var(--text-main);
-  color: var(--bg-page);
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-.wf-persona-pill .pill-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-wire);
-}
-
-.wf-persona-pill.is-active .pill-dot {
-  background: var(--bg-page);
-}
-
-.wf-drone-badge {
-  color: #ebcb8b;
-  border-color: rgba(235, 203, 139, 0.3);
-  background: rgba(235, 203, 139, 0.06);
-}
-
-@media (max-width: 600px) {
-  .wf-floating-toggle-container {
-    top: 14px;
-    width: calc(100% - 32px);
-  }
-  .wf-persona-pill {
-    padding: 5px 10px;
-    font-size: 0.7rem;
   }
 }
 

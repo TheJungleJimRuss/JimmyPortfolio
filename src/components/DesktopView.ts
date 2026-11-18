@@ -23,9 +23,40 @@ const BASE_SIZES: Record<string, Size> = {
 const PROJECT_WINDOW_SIZE: Size = { width: 640, height: 520 };
 
 /** The fixed size of a window, shrunk only when the Desktop surface is smaller than it. */
-export function windowSize(id: WindowId, bounds: Size): Size {
-  const base = BASE_SIZES[id] ?? PROJECT_WINDOW_SIZE;
+export function windowSize(id: WindowId, bounds: Size, custom?: Size): Size {
+  const base = custom ?? BASE_SIZES[id] ?? PROJECT_WINDOW_SIZE;
   return { width: Math.min(base.width, bounds.width), height: Math.min(base.height, bounds.height) };
+}
+
+export const MIN_WINDOW: Size = { width: 280, height: 200 };
+
+export type ResizeEdge = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
+/** Applies a pointer delta to one edge or corner, keeping the window inside `bounds` and above the minimum size. */
+export function resizeRect(
+  start: { position: Position; size: Size },
+  edge: ResizeEdge,
+  dx: number,
+  dy: number,
+  bounds: Size,
+): { position: Position; size: Size } {
+  let { x, y } = start.position;
+  let { width, height } = start.size;
+  const minW = Math.min(MIN_WINDOW.width, bounds.width);
+  const minH = Math.min(MIN_WINDOW.height, bounds.height);
+  if (edge.includes('e')) width = Math.min(Math.max(width + dx, minW), bounds.width - x);
+  if (edge.includes('s')) height = Math.min(Math.max(height + dy, minH), bounds.height - y);
+  if (edge.includes('w')) {
+    const right = x + width;
+    x = Math.min(Math.max(x + dx, 0), right - minW);
+    width = right - x;
+  }
+  if (edge.includes('n')) {
+    const bottom = y + height;
+    y = Math.min(Math.max(y + dy, 0), bottom - minH);
+    height = bottom - y;
+  }
+  return { position: { x: Math.round(x), y: Math.round(y) }, size: { width: Math.round(width), height: Math.round(height) } };
 }
 
 /** Keeps a window fully inside the Desktop surface so its title bar stays reachable. */
@@ -97,4 +128,32 @@ export function updateOrder(order: readonly WindowId[], state: DesktopState): Wi
 export function formatClock(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export type EscapeAction = 'leave-stage' | 'close-window' | 'none';
+
+/**
+ * While a game stage owns the keyboard, plain Esc belongs to the game; only Shift+Esc hands the keyboard back.
+ * Otherwise Esc closes the focused window.
+ */
+export function escapeAction(ctx: { stageOwnsKeyboard: boolean; shift?: boolean; hasFocusedWindow: boolean }): EscapeAction {
+  if (ctx.stageOwnsKeyboard) return ctx.shift ? 'leave-stage' : 'none';
+  return ctx.hasFocusedWindow ? 'close-window' : 'none';
+}
+
+export type FocusTarget = { kind: 'icon'; id: WindowId } | { kind: 'taskbar'; id: WindowId };
+
+/**
+ * Where focus goes after a window closes, best first. Desktop icons exist only on the desktop layout;
+ * a Project window has no icon of its own, so it returns to the Projects icon.
+ */
+export function closeFocusTargets(
+  closed: WindowId,
+  layout: DesktopLayout,
+  nextFocused: WindowId | null,
+): FocusTarget[] {
+  const targets: FocusTarget[] = [];
+  if (layout === 'desktop') targets.push({ kind: 'icon', id: closed.startsWith('project:') ? 'projects' : closed });
+  if (nextFocused !== null) targets.push({ kind: 'taskbar', id: nextFocused });
+  return targets;
 }

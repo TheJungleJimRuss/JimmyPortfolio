@@ -83,29 +83,275 @@ export interface ProjectEntry {
   slots: ProjectSlots;
 }
 
-const marker: Inline[] = [{ text: PLACEHOLDER }];
-
-function placeholderSlots(): ProjectSlots {
-  return {
-    controlsNotes: PLACEHOLDER,
-    category: PLACEHOLDER,
-    title: PLACEHOLDER,
-    tags: [PLACEHOLDER],
-    summary: PLACEHOLDER,
-    links: { source: PLACEHOLDER, live: PLACEHOLDER },
-    specs: [
-      { key: PLACEHOLDER, value: PLACEHOLDER },
-      { key: PLACEHOLDER, value: PLACEHOLDER },
-      { key: PLACEHOLDER, value: PLACEHOLDER },
-    ],
-    deepDive: { heading: PLACEHOLDER, body: [{ kind: 'paragraph', content: marker }] },
-    challenges: { heading: PLACEHOLDER, body: [{ kind: 'paragraph', content: marker }] },
-  };
-}
-
 export const PROJECTS: readonly ProjectEntry[] = [
-  { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', stage: { medium: 'unity-webgl', buildPath: 'kcc/index.html', videoUrl: '', maxBuildMB: 15 }, slots: placeholderSlots() },
-  { slug: 'drone-desktop', name: 'Drone Desktop', stage: { medium: 'in-progress' }, slots: placeholderSlots() },
-  { slug: 'photography-portfolio', name: 'Photography Portfolio', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/Photography-Portfolio/' }, slots: placeholderSlots() },
-  { slug: 'music-studio-website', name: 'Music Studio Website', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/AlcoveSite/' }, slots: placeholderSlots() },
+  { slug: 'kinematic-character-controller', name: 'Kinematic Character Controller', stage: { medium: 'unity-webgl', buildPath: 'kcc/index.html', videoUrl: '', maxBuildMB: 15 }, slots: {
+  "controlsNotes": "Sample: WASD to move, Space to jump, mouse to look.",
+  "category": "Game",
+  "title": "Kinematic Character Controller",
+  "tags": [
+    "Unity",
+    "C#",
+    "Physics",
+    "WebGL"
+  ],
+  "summary": "I built this character controller for Unity by hand in C#. It uses Kasper Faureby's collide and slide algorithm for collision. I had to freshen up my math skills to complete this project; linear algebra had me beat a couple times. It has support for moving platforms, and handles tight corners and complex geometry well.",
+  "links": {
+    "source": "https://github.com/TheJungleJimRuss/Kinematic-Unity-Character-Controller",
+    "live": "[ ... ]"
+  },
+  "specs": [
+    {
+      "key": "Engine",
+      "value": "Unity 6"
+    },
+    {
+      "key": "Language",
+      "value": "C#"
+    },
+    {
+      "key": "Build",
+      "value": "WebGL, under 15 MB"
+    },
+    {
+      "key": "Role",
+      "value": "Solo"
+    }
+  ],
+  "deepDive": {
+    "heading": "Deep dive",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. The controller moves by sweeping a capsule and sliding along what it hits."
+          }
+        ]
+      },
+      {
+        "kind": "bullets",
+        "items": [
+          [
+            {
+              "text": "Ground snapping keeps steps and slopes smooth."
+            }
+          ],
+          [
+            {
+              "text": "Moving platforms pass their velocity to the player."
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  "challenges": {
+    "heading": "What went wrong",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. Jitter on slopes came from fighting the physics step; moving the sweep to a fixed update fixed it."
+          }
+        ]
+      }
+    ]
+  }
+} },
+  { slug: 'drone-desktop', name: 'Drone Desktop', stage: { medium: 'in-progress' }, slots: {
+  "controlsNotes": "Sample: not playable yet.",
+  "category": "Concept",
+  "title": "Drone Desktop",
+  "tags": [
+    "Three.js",
+    "TypeScript",
+    "Audio"
+  ],
+  "summary": "Sample text. A flight-themed companion site: take off from a transmitter and climb through clouds into open sky.",
+  "links": {
+    "source": "https://github.com/TheJungleJimRuss",
+    "live": "https://example.com"
+  },
+  "specs": [
+    {
+      "key": "Stack",
+      "value": "Vite + Three.js"
+    },
+    {
+      "key": "Status",
+      "value": "In progress"
+    },
+    {
+      "key": "Role",
+      "value": "Solo"
+    }
+  ],
+  "deepDive": {
+    "heading": "Deep dive",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. The throttle input drives motor audio and camera altitude together."
+          }
+        ]
+      },
+      {
+        "kind": "bullets",
+        "items": [
+          [
+            {
+              "text": "Scroll maps to altitude."
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  "challenges": {
+    "heading": "What went wrong",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. Keeping the 3D scene light enough for phones is the open problem."
+          }
+        ]
+      }
+    ]
+  }
+} },
+  { slug: 'photography-portfolio', name: 'Photography Portfolio', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/Photography-Portfolio/' }, slots: {
+  "controlsNotes": "Sample: scroll and click through the gallery.",
+  "category": "Web",
+  "title": "Photography Portfolio",
+  "tags": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "summary": "Sample text. A fast, image-first portfolio site with a clean grid and full-screen viewing.",
+  "links": {
+    "source": "https://github.com/TheJungleJimRuss",
+    "live": "https://example.com"
+  },
+  "specs": [
+    {
+      "key": "Stack",
+      "value": "Vanilla web"
+    },
+    {
+      "key": "Hosting",
+      "value": "GitHub Pages"
+    },
+    {
+      "key": "Role",
+      "value": "Design and build"
+    }
+  ],
+  "deepDive": {
+    "heading": "Deep dive",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. Images are sized and lazy-loaded so the first screen paints quickly."
+          }
+        ]
+      },
+      {
+        "kind": "bullets",
+        "items": [
+          [
+            {
+              "text": "The grid adapts from one to four columns."
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  "challenges": {
+    "heading": "What went wrong",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. Balancing image quality against load time took several passes."
+          }
+        ]
+      }
+    ]
+  }
+} },
+  { slug: 'music-studio-website', name: 'Music Studio Website', stage: { medium: 'iframe', url: 'https://thejunglejimruss.github.io/AlcoveSite/' }, slots: {
+  "controlsNotes": "Sample: scroll to explore; links open the booking page.",
+  "category": "Web",
+  "title": "Music Studio Website",
+  "tags": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "summary": "Sample text. A clear, welcoming site for a small recording studio: services, gear and how to book.",
+  "links": {
+    "source": "https://github.com/TheJungleJimRuss",
+    "live": "https://example.com"
+  },
+  "specs": [
+    {
+      "key": "Stack",
+      "value": "Vanilla web"
+    },
+    {
+      "key": "Hosting",
+      "value": "GitHub Pages"
+    },
+    {
+      "key": "Role",
+      "value": "Design and build"
+    }
+  ],
+  "deepDive": {
+    "heading": "Deep dive",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. The layout puts booking one tap away on every screen size."
+          }
+        ]
+      },
+      {
+        "kind": "bullets",
+        "items": [
+          [
+            {
+              "text": "Gear is listed in plain, scannable groups."
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  "challenges": {
+    "heading": "What went wrong",
+    "body": [
+      {
+        "kind": "paragraph",
+        "content": [
+          {
+            "text": "Sample text. Making a dark, moody look still pass contrast checks."
+          }
+        ]
+      }
+    ]
+  }
+} },
 ];

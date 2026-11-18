@@ -32,13 +32,7 @@
   </head>
   <body>
     <!-- ==================== DEV TERMINAL INTRO OVERLAY ==================== -->
-    <div id="introOverlay" class="intro-overlay" role="region" aria-label="Dev Terminal Intro">
-      <div class="intro-prompt-wrap" style="display: none;">
-        <span class="intro-prompt">&gt; [ CLICK OR PRESS ANY KEY TO INITIALIZE ]</span>
-        <span class="intro-cursor" aria-hidden="true"></span>
-      </div>
-      <div class="intro-terminal-log" aria-live="polite"></div>
-    </div>
+    <div id="introOverlay" class="intro-overlay" aria-hidden="true"></div>
 
     <!-- ==================== DESKTOP ==================== -->
     <div id="desktop" class="desktop is-booting" data-layout="desktop">
@@ -64,10 +58,17 @@
       </div>
 
       <div id="taskbar" class="taskbar">
-        <a href="./index.html" id="navGatewayBtn" class="taskbar-gateway">
-          <span aria-hidden="true">&larr;</span>
-          <span>GATEWAY</span>
-        </a>
+        <button id="powerBtn" class="taskbar-power" type="button" aria-haspopup="menu" aria-expanded="false"
+          commandfor="powerMenu" command="toggle-popover">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 1.75v5.5"/><path d="M4.4 3.9a5.25 5.25 0 1 0 7.2 0"/></svg>
+          <span>POWER</span>
+        </button>
+        <div id="powerMenu" class="power-menu" popover="auto">
+          <div focusgroup="menu nomemory" aria-labelledby="powerBtn">
+            <button type="button" data-power="restart">Restart</button>
+            <a href="./index.html" data-power="shutdown">Shut Down</a>
+          </div>
+        </div>
         <div id="taskbarButtons" class="taskbar-buttons" role="toolbar" aria-label="Open windows"></div>
         <time id="taskbarClock" class="taskbar-clock"></time>
       </div>

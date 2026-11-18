@@ -1,11 +1,15 @@
 import { createInitialState, reduce, type DesktopAction, type DesktopState, type Position, type WindowId } from './DesktopState';
 import {
   clampPosition,
+  closeFocusTargets,
   desktopLayoutFor,
+  escapeAction,
   formatClock,
   taskbarItems,
   updateOrder,
   windowSize,
+  resizeRect,
+  type ResizeEdge,
   windowTitle,
 } from './DesktopView';
 
@@ -49,7 +53,7 @@ export class DesktopController {
   private locked = false;
   private pendingLayout = false;
   private clockTimer: ReturnType<typeof setInterval> | null = null;
-  private lastAnnouncement: string | null = null;
+  private announceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly els: DesktopElements,
@@ -62,7 +66,7 @@ export class DesktopController {
   mount(): void {
     const { root, icons } = this.els;
     this.state = reduce(this.state, { type: 'arrive' });
-    this.state = { ...this.state, announcement: null };
+    this.state = { ...this.centerHero(this.state), announcement: null };
 
     icons.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-open]');
@@ -73,8 +77,19 @@ export class DesktopController {
       if (btn) this.dispatch({ type: 'open', id: btn.dataset.windowId as WindowId });
     });
     root.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape' || this.isBooting() || !this.state.focused) return;
-      this.dispatch({ type: 'close', id: this.state.focused });
+      if (e.key !== 'Escape' || this.isBooting()) return;
+      const frame = this.win.document.activeElement;
+      const action = escapeAction({
+        stageOwnsKeyboard: frame instanceof HTMLIFrameElement && root.contains(frame),
+        shift: e.shiftKey,
+        hasFocusedWindow: this.state.focused !== null,
+      });
+      if (action === 'leave-stage') {
+        (frame as HTMLElement).blur();
+        if (this.state.focused) this.windows.get(this.state.focused)?.el.focus({ preventScroll: true });
+      } else if (action === 'close-window' && this.state.focused) {
+        this.dispatch({ type: 'close', id: this.state.focused });
+      }
     });
     this.win.addEventListener('resize', () => this.onResize());
 
@@ -93,20 +108,38 @@ export class DesktopController {
     if (this.pendingLayout) this.onResize();
   }
 
-  /** Reveals the Desktop (it is laid out but invisible while the Intro sequence runs). */
+  /** Reveals the finished Desktop (it is laid out but unseen, or being traced, while the Intro sequence runs). */
   reveal(): void {
     if (!this.isBooting()) return;
-    this.els.root.classList.remove('is-booting');
-    this.els.live.textContent = 'Desktop ready';
+    this.els.root.classList.remove('is-booting', 'is-tracing');
+    this.announce('Desktop ready');
+  }
+
+  /** Opens the deep-linked window of the arrival. Called after the bloom, so it opens with ordinary window motion. */
+  openDeepLink(): void {
     const deepLink = this.options.deepLink;
-    if (deepLink) {
-      this.dispatch({ type: 'arrive', deepLink });
-      this.state = { ...this.state, announcement: null };
-    }
+    if (!deepLink) return;
+    this.options.deepLink = null;
+    this.dispatch({ type: 'arrive', deepLink });
+    this.state = { ...this.centerHero(this.state), announcement: null };
+  }
+
+  /** The Hero window arrives in the middle of the Desktop surface (desktop layout only). */
+  private centerHero(state: DesktopState): DesktopState {
+    const bounds = this.bounds();
+    if (state.layout === 'phone' || bounds.width === 0 || bounds.height === 0) return state;
+    const size = windowSize('hero', bounds);
+    const position = clampPosition(
+      { x: (bounds.width - size.width) / 2, y: (bounds.height - size.height) / 2 },
+      size,
+      bounds,
+    );
+    return { ...state, windows: state.windows.map((w) => (w.id === 'hero' ? { ...w, position } : w)) };
   }
 
   dispose(): void {
     if (this.clockTimer) clearInterval(this.clockTimer);
+    if (this.announceTimer) clearTimeout(this.announceTimer);
   }
 
   getState(): DesktopState {
@@ -117,11 +150,37 @@ export class DesktopController {
     const before = this.state;
     this.state = reduce(before, action);
     this.render();
+    if (before === this.state) return;
+    if (this.state.announcement) this.announce(this.state.announcement);
     if (action.type === 'open' && this.state.focused === action.id) {
       this.windows.get(action.id)?.el.focus({ preventScroll: true });
-    } else if (action.type === 'close' && before !== this.state) {
-      this.els.icons.querySelector<HTMLElement>(`[data-open="${action.id}"]`)?.focus();
+    } else if (action.type === 'close' || action.type === 'back') {
+      this.focusAfterClose(before);
     }
+  }
+
+  /** Moves focus to the closed window's icon, or the Taskbar where there are no icons. */
+  private focusAfterClose(before: DesktopState): void {
+    const closed = before.windows.find((w) => !this.state.windows.some((x) => x.id === w.id));
+    if (!closed) return;
+    for (const t of closeFocusTargets(closed.id, this.state.layout, this.state.focused)) {
+      const root = t.kind === 'icon' ? this.els.icons : this.els.taskbarButtons;
+      const sel = t.kind === 'icon' ? `[data-open="${t.id}"]` : `[data-window-id="${t.id}"]`;
+      const el = root.querySelector<HTMLElement>(sel);
+      if (!el) continue;
+      el.focus();
+      if (this.win.document.activeElement === el) return;
+    }
+  }
+
+  /** One polite live region: cleared first so a repeated message is still read. */
+  private announce(text: string): void {
+    const { live } = this.els;
+    live.textContent = '';
+    if (this.announceTimer) clearTimeout(this.announceTimer);
+    this.announceTimer = setTimeout(() => {
+      live.textContent = text;
+    }, 60);
   }
 
   private isBooting(): boolean {
@@ -207,6 +266,13 @@ export class DesktopController {
     maximize.addEventListener('click', () => this.dispatch({ type: 'maximize', id }));
     close.addEventListener('click', () => this.dispatch({ type: 'close', id }));
     this.bindDrag(id, handle);
+    for (const edge of ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'] as const) {
+      const grip = document.createElement('div');
+      grip.className = `desk-resize desk-resize-${edge}`;
+      grip.setAttribute('aria-hidden', 'true');
+      el.append(grip);
+      this.bindResize(id, grip, edge);
+    }
 
     const made = { el, handle, minimize, maximize, close };
     this.windows.set(id, made);
@@ -216,7 +282,33 @@ export class DesktopController {
   private displayPosition(id: WindowId): Position {
     const w = this.state.windows.find((x) => x.id === id);
     const bounds = this.bounds();
-    return clampPosition(w?.position ?? { x: 0, y: 0 }, windowSize(id, bounds), bounds);
+    return clampPosition(w?.position ?? { x: 0, y: 0 }, windowSize(id, bounds, w?.size), bounds);
+  }
+
+  private currentSize(id: WindowId): { width: number; height: number } {
+    const w = this.state.windows.find((x) => x.id === id);
+    return windowSize(id, this.bounds(), w?.size);
+  }
+
+  private bindResize(id: WindowId, grip: HTMLElement, edge: ResizeEdge): void {
+    let start: { x: number; y: number; position: Position; size: { width: number; height: number } } | null = null;
+    grip.addEventListener('pointerdown', (e) => {
+      const w = this.state.windows.find((x) => x.id === id);
+      if (e.button !== 0 || this.state.layout !== 'desktop' || !w || w.maximized) return;
+      e.preventDefault();
+      start = { x: e.clientX, y: e.clientY, position: this.displayPosition(id), size: this.currentSize(id) };
+      grip.setPointerCapture(e.pointerId);
+      this.els.surface.classList.add('is-resizing');
+    });
+    grip.addEventListener('pointermove', (e) => {
+      if (!start || !grip.hasPointerCapture(e.pointerId)) return;
+      const next = resizeRect(start, edge, e.clientX - start.x, e.clientY - start.y, this.bounds());
+      this.dispatch({ type: 'resize', id, ...next });
+    });
+    grip.addEventListener('lostpointercapture', () => {
+      start = null;
+      this.els.surface.classList.remove('is-resizing');
+    });
   }
 
   private bindDrag(id: WindowId, handle: HTMLButtonElement): void {
@@ -227,7 +319,7 @@ export class DesktopController {
     };
     const moveTo = (p: Position) => {
       const bounds = this.bounds();
-      this.dispatch({ type: 'move', id, position: clampPosition(p, windowSize(id, bounds), bounds) });
+      this.dispatch({ type: 'move', id, position: clampPosition(p, this.currentSize(id), bounds) });
     };
 
     handle.addEventListener('pointerdown', (e) => {
@@ -280,7 +372,7 @@ export class DesktopController {
       const visible = !!w && !w.minimized;
       parts.el.hidden = !visible;
       if (!w) continue;
-      const size = windowSize(id, bounds);
+      const size = windowSize(id, bounds, w.size);
       const pos = clampPosition(w.position, size, bounds);
       parts.el.style.setProperty('--win-x', `${pos.x}px`);
       parts.el.style.setProperty('--win-y', `${pos.y}px`);
@@ -301,10 +393,6 @@ export class DesktopController {
 
     this.renderTaskbar();
 
-    if (state.announcement && state.announcement !== this.lastAnnouncement) {
-      this.els.live.textContent = state.announcement;
-    }
-    this.lastAnnouncement = state.announcement;
     this.options.onState?.(state);
   }
 

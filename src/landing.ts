@@ -1,7 +1,6 @@
 import './styles/tokens.css';
 import './styles/wireframe.css';
 import './styles/gateway.css';
-import './styles/effects3d.css';
 
 import { tactileAudio } from './components/TactileAudio';
 import { GatewayController, type PathwayPhase } from './components/GatewayController';

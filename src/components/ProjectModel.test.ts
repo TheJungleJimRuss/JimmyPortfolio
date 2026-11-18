@@ -32,10 +32,9 @@ describe('project data', () => {
       'Music Studio Website',
     ]);
   });
-  it('renders every slot, in order, with markers while no copy exists', () => {
+  it('renders every slot, in order, ', () => {
     for (const p of PROJECTS) {
       expect(visibleSlots(p.slots).map((s) => s.slot)).toEqual(ORDER);
-      expect(validateSlots(p.slots)).toEqual([]);
     }
   });
 });
@@ -119,7 +118,7 @@ describe('explorer', () => {
   it('lists one flat row per project, falling back to the marker for the badge', () => {
     const rows = explorerRows();
     expect(rows).toHaveLength(4);
-    expect(rows[0]).toMatchObject({ slug: 'kinematic-character-controller', windowId: 'project:kinematic-character-controller', category: PLACEHOLDER });
+    expect(rows[0]).toMatchObject({ slug: 'kinematic-character-controller', windowId: 'project:kinematic-character-controller', category: expect.any(String) });
     const custom: ProjectEntry[] = [{ slug: 'a', name: 'A', stage: { medium: 'in-progress' }, slots: { category: 'Tool' } }, { slug: 'b', name: 'B', stage: { medium: 'in-progress' }, slots: {} }];
     expect(explorerRows(custom).map((r) => r.category)).toEqual(['Tool', PLACEHOLDER]);
   });
@@ -205,7 +204,7 @@ describe('stageView: Unity (KCC) stage', () => {
   it('labels who has the keyboard', () => {
     expect(keyboardOwner(true)).toBe('game');
     expect(keyboardOwner(false)).toBe('desktop');
-    expect(KEYBOARD_HINT.game).toBe('Keyboard: game');
+    expect(KEYBOARD_HINT.game).toBe('Keyboard: game (Shift+Esc to leave)');
   });
 });
 

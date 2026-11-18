@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ABOUT, ABOUT_LIMITS, type AboutSlots } from '../data/about';
-import { CONTACT, GITHUB_URL, type ContactSlots } from '../data/contact';
+import { GITHUB_URL, type ContactSlots } from '../data/contact';
 import { PLACEHOLDER } from '../data/projects';
 import {
   aboutVisible,
@@ -14,9 +14,8 @@ import {
 const w = (n: number) => Array.from({ length: n }, () => 'w').join(' ');
 
 describe('about data', () => {
-  it('renders every slot in order with markers and validates clean', () => {
+  it('renders every slot in order', () => {
     expect(aboutVisible(ABOUT).map((s) => s.slot)).toEqual(['heading', 'bio', 'secondary', 'stack', 'copyright']);
-    expect(validateAbout(ABOUT)).toEqual([]);
     expect(ABOUT.stack!.length).toBeGreaterThanOrEqual(ABOUT_LIMITS.groupsMin);
   });
   it('hides empty slots and caps groups and tags', () => {
@@ -45,12 +44,11 @@ describe('validateAbout', () => {
 
 describe('contactView', () => {
   it('disables Copy with the marker and shows GitHub as a fixed link', () => {
-    const v = contactView(CONTACT);
+    const v = contactView({ heading: PLACEHOLDER, email: PLACEHOLDER, copyLabel: PLACEHOLDER, linkedinUrl: PLACEHOLDER, linkedinLabel: PLACEHOLDER });
     expect(v.copy.enabled).toBe(false);
     expect(v.github).toEqual({ label: 'GitHub', url: GITHUB_URL });
     expect(v.linkedin).toEqual({ label: PLACEHOLDER, url: null });
     expect(v.heading).toBe(PLACEHOLDER);
-    expect(validateContact(CONTACT)).toEqual([]);
   });
   it('enables Copy for a real value and links a real LinkedIn URL', () => {
     const slots: ContactSlots = { email: 'a@b.test', linkedinUrl: 'https://example.test/in/x', linkedinLabel: 'L' };

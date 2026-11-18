@@ -3,7 +3,6 @@
  * Every text value is the owner's copy. Until it is written, each slot holds the `[ ... ]` marker.
  * The email address is a slot value; with the marker the Copy email button is disabled.
  */
-import { PLACEHOLDER } from './projects';
 
 /** Documented slot limits (spec: Windows and content). Enforced by `validateContact`, not by truncation. */
 export const CONTACT_LIMITS = {
@@ -27,10 +26,10 @@ export interface ContactSlots {
 }
 
 export const CONTACT: ContactSlots = {
-  heading: PLACEHOLDER,
-  callToAction: PLACEHOLDER,
-  email: PLACEHOLDER,
-  copyLabel: PLACEHOLDER,
-  linkedinUrl: PLACEHOLDER,
-  linkedinLabel: PLACEHOLDER,
+  "heading": "Contact",
+  "callToAction": "Have a project or idea? Contact me and we can make it a reality",
+  "email": "alexanderjruss@gmail.com",
+  "copyLabel": "Copy email",
+  "linkedinUrl": "https://www.linkedin.com/in/jimmy-russ/",
+  "linkedinLabel": "LinkedIn"
 };

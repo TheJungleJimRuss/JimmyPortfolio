@@ -356,3 +356,23 @@ describe('back', () => {
     expect(visible(s)).toEqual(['hero']);
   });
 });
+
+describe('announcements are per action', () => {
+  it('clears the announcement when a later action announces nothing', () => {
+    const s = run(arrived(), { type: 'open', id: 'about' }, { type: 'focus', id: 'hero' });
+    expect(s.announcement).toBeNull();
+  });
+
+  it('announces a second restore after a minimize in between', () => {
+    const open = run(arrived(), { type: 'open', id: 'about' }, { type: 'minimize', id: 'about' }, { type: 'open', id: 'about' });
+    expect(open.announcement).toBe('About restored');
+    const again = run(open, { type: 'minimize', id: 'about' });
+    expect(again.announcement).toBeNull();
+    expect(reduce(again, { type: 'open', id: 'about' }).announcement).toBe('About restored');
+  });
+
+  it('keeps the same state object for a no-op action', () => {
+    const s = run(arrived(), { type: 'open', id: 'about' });
+    expect(reduce(s, { type: 'close', id: 'project:nope' })).toBe(s);
+  });
+});

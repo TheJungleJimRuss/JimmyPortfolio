@@ -118,6 +118,9 @@ interface StageHooks {
 
 /** Trusted sites only (our own GitHub Pages). allow-same-origin keeps their storage and relative fetches working
  *  inside their own cross-origin frame; it does not touch this page. No top-navigation, downloads or modals. */
+/** Virtual desktop viewport the live site lays out in before being scaled to the stage. */
+const LIVE_VIEWPORT_W = 1280;
+const LIVE_VIEWPORT_H = 720;
 const SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-forms';
 
 function stageLink(link: StageLink): HTMLAnchorElement {
@@ -143,6 +146,16 @@ function stageNode(project: ProjectEntry, view: StageView, dispatch: (a: Desktop
       f.setAttribute('sandbox', SANDBOX);
       f.src = view.url;
       frame.append(f);
+      // Render the site at a real desktop viewport, then scale the whole thing down to fit the stage.
+      frame.classList.add('is-scaled');
+      f.style.width = `${LIVE_VIEWPORT_W}px`;
+      f.style.height = `${LIVE_VIEWPORT_H}px`;
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(([entry]) => {
+          const w = entry?.contentRect.width ?? 0;
+          if (w > 0) f.style.transform = `scale(${w / LIVE_VIEWPORT_W})`;
+        }).observe(frame);
+      }
       break;
     }
     case 'unity':
@@ -208,7 +221,7 @@ export function createProjectWindow(slug: string, dispatch: (a: DesktopAction) =
   let teardown: (() => void) | null = null;
   let pendingHint: HTMLElement | null = null;
 
-  /** Same-origin Unity iframe: probe the host first, hand the keyboard back on Esc or any outside click. */
+  /** Same-origin Unity iframe: probe the host first, hand the keyboard back on Shift+Esc or any outside click. */
   const mountUnity: StageHooks['mountUnity'] = (frame, view) => {
     const pageUrl = resolveBuildUrl(view.buildPath, import.meta.env.BASE_URL, document.baseURI);
     const hint = el('p', 'pw-kbd', KEYBOARD_HINT.desktop);
@@ -263,7 +276,7 @@ export function createProjectWindow(slug: string, dispatch: (a: DesktopAction) =
           f.contentDocument?.addEventListener(
             'keydown',
             (e) => {
-              if (e.key === 'Escape') release();
+              if (e.key === 'Escape' && e.shiftKey) release(); // plain Esc belongs to the game
             },
             true,
           );

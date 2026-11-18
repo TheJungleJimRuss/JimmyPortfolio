@@ -1,32 +1,54 @@
-import { IntroCommandRunner } from './IntroCommandRunner';
 import { HeroOutlineTracer } from './HeroOutlineTracer';
 import { tactileAudio } from './TactileAudio';
 import type { ViewportLayoutAdapter } from './ViewportLayoutAdapter';
+import {
+  DEFAULT_BOOT_LINES,
+  HANDOVER_HOLD_MS,
+  buildBootSchedule,
+  completeFrame,
+  nextPhase,
+  type BootEvent,
+  type BootLines,
+  type BootPhase,
+} from './BootShell';
+import { createBootShellView, type BootShellViewLike } from './BootShellView';
+import { NAME_TRACE_MS, buildOsTrace, shouldTrace, type DesktopTraceLike } from './DesktopTrace';
 
 export interface IntroSequenceOptions {
-  /** Holds the Hero name layout from intro start until the hero materializes. */
+  /** Holds the Hero name layout from the trace start until the hero materializes. */
   layoutAdapter?: Pick<ViewportLayoutAdapter, 'decision' | 'lock' | 'release'>;
+  /** Boot shell copy; defaults to the placeholder lines. */
+  lines?: BootLines;
+  /** Draws the Desktop's lines (Taskbar, icons, File Explorer, Hero window) before the Hero name trace. */
+  desktopTrace?: DesktopTraceLike;
+  /** Test seam: replaces the DOM view. */
+  view?: BootShellViewLike;
+  /** Test seam: replaces the prefers-reduced-motion check (read at each input). */
+  reducedMotion?: () => boolean;
 }
 
 export class IntroSequenceController {
   private overlay: HTMLElement | null = null;
-  private promptWrap: HTMLElement | null = null;
-  private terminalLog: HTMLElement | null = null;
+  private view: BootShellViewLike | null = null;
   private targetHero: HTMLElement | null = null;
   private heroTraceSvg: SVGElement | null = null;
   private onFinish: (() => void) | null = null;
 
-  private commandRunner = new IntroCommandRunner();
   private outlineTracer = new HeroOutlineTracer();
+  private readonly lines: BootLines;
 
-  private isRunning = false;
+  private phase: BootPhase = 'waiting';
+  private reduced = false;
+  private timers: ReturnType<typeof setTimeout>[] = [];
   private isFinished = false;
   private layoutLocked = false;
 
-  constructor(private readonly options: IntroSequenceOptions = {}) {}
+  constructor(private readonly options: IntroSequenceOptions = {}) {
+    this.lines = options.lines ?? DEFAULT_BOOT_LINES;
+  }
 
-  private boundPointerHandler = (e: Event) => this.handleTrigger(e);
-  private boundKeyHandler = (e: KeyboardEvent) => this.handleKeyTrigger(e);
+  private boundPointerHandler = (e: Event) => this.handleInput(e);
+  private boundKeyHandler = (e: KeyboardEvent) => this.handleKey(e);
 
   public mount(
     rootElement: HTMLElement,
@@ -36,11 +58,9 @@ export class IntroSequenceController {
   ): void {
     this.overlay = rootElement;
     this.onFinish = onFinish;
+    this.view = this.options.view ?? createBootShellView(rootElement, this.lines);
+    this.view.render(null);
 
-    this.promptWrap = rootElement.querySelector('.intro-prompt-wrap');
-    this.terminalLog = rootElement.querySelector('.intro-terminal-log');
-    const maxCols = Math.max(0, ...this.commandRunner.getCommandSequence().map((c) => c.text.length));
-    if (maxCols > 0) this.terminalLog?.style.setProperty?.('--log-cols', String(maxCols));
     this.targetHero = targetHero || (typeof document !== 'undefined' ? document.getElementById('wfHeroName') : null);
     this.heroTraceSvg = heroTraceSvg || (typeof document !== 'undefined' ? (document.getElementById('heroTraceSvg') as SVGElement | null) : null);
 
@@ -54,83 +74,109 @@ export class IntroSequenceController {
     }
   }
 
-  private handleTrigger(e: Event): void {
+  private handleInput(e: Event): void {
     e.stopPropagation();
-    // Must run synchronously in the gesture so iOS lets timer-driven ticks play.
+    this.input();
+  }
+
+  private handleKey(e: KeyboardEvent): void {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    this.input();
+  }
+
+  /** Any key, click or tap. Must run synchronously in the gesture so iOS lets timer-driven ticks play. */
+  public input(): void {
     tactileAudio.unlock();
-    if (!this.isRunning && !this.isFinished) {
-      void this.triggerSequence();
-    } else if (this.isRunning && !this.isFinished) {
-      this.skipToEnd();
+    this.dispatch('input');
+  }
+
+  private isReducedMotion(): boolean {
+    if (this.options.reducedMotion) return this.options.reducedMotion();
+    return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  private dispatch(event: BootEvent): void {
+    if (this.isFinished) return;
+    const from = this.phase;
+    if (from === 'waiting' && event === 'input') this.reduced = this.isReducedMotion();
+    const to = nextPhase(from, event, this.reduced);
+    if (to === from) return;
+    this.phase = to;
+    this.clearTimers();
+
+    if (to === 'printing') {
+      this.startPrinting();
+    } else if (to === 'printed') {
+      this.view?.render(completeFrame(this.lines));
+      if (from === 'waiting') tactileAudio.playTick(1200);
+      if (!this.reduced) this.later(HANDOVER_HOLD_MS, () => this.dispatch('holdDone'));
+    } else if (to === 'handover') {
+      this.view?.render(completeFrame(this.lines));
+      void this.handover();
     }
   }
 
-  private handleKeyTrigger(e: KeyboardEvent): void {
-    if (e.repeat) return;
-    tactileAudio.unlock();
-    if (!this.isRunning && !this.isFinished) {
-      void this.triggerSequence();
-    } else if (this.isRunning && !this.isFinished) {
-      this.skipToEnd();
-    }
+  private startPrinting(): void {
+    const frames = buildBootSchedule(this.lines, false);
+    const commandLen = this.lines.command.length;
+    let prevRows = 0;
+    frames.forEach((frame, i) => {
+      this.later(frame.atMs, () => {
+        this.view?.render(frame);
+        if (frame.rows > prevRows) {
+          prevRows = frame.rows;
+          tactileAudio.playTick(1200);
+        }
+        if (i === frames.length - 1 && frame.commandChars === commandLen) this.dispatch('printDone');
+      });
+    });
   }
 
-  public async triggerSequence(): Promise<void> {
-    if (this.isRunning || this.isFinished) return;
-    this.isRunning = true;
+  private later(ms: number, fn: () => void): void {
+    this.timers.push(setTimeout(fn, ms));
+  }
+
+  private clearTimers(): void {
+    for (const t of this.timers) clearTimeout(t);
+    this.timers = [];
+  }
+
+  /** Shell text fades quickly, then the trace draws on clean black and the hero materializes. */
+  private async handover(): Promise<void> {
     this.lockLayout();
 
-    if (this.promptWrap) {
-      this.promptWrap.style.display = 'none';
-    }
-    if (this.terminalLog) {
-      this.terminalLog.classList.add('is-active');
-    }
-
-    // Check prefers-reduced-motion
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-    if (prefersReducedMotion) {
-      this.skipToEnd();
-      return;
-    }
-
-    await this.commandRunner.run((line) => {
-      if (this.terminalLog && typeof document !== 'undefined') {
-        const lineEl = document.createElement('div');
-        lineEl.className = 'intro-log-line';
-        lineEl.textContent = line;
-        this.terminalLog.appendChild(lineEl);
-      }
-      tactileAudio.playTick(1200);
-    });
-
-    // Dissolve terminal log lines upward gracefully
-    if (this.terminalLog) {
-      this.terminalLog.classList.add('is-dissolving');
-    }
     if (this.overlay) {
+      this.overlay.classList.add('is-dissolving');
       this.overlay.style.opacity = '0';
       this.overlay.classList.add('is-fading');
     }
 
-    // Wait for terminal log to dissolve before laser stroke begins
+    if (!shouldTrace(this.reduced)) {
+      this.skipToEnd();
+      return;
+    }
+
+    // Wait for the shell to fade before the laser stroke begins
     await new Promise((r) => setTimeout(r, 320));
+    if (this.isFinished) return;
     if (this.overlay) {
       this.overlay.style.display = 'none';
     }
 
-    // Trace the outline of each character in-place
-    await this.outlineTracer.startTrace(undefined, () => this.releaseLayout());
+    // Outline trace, outside in: the Desktop's parts (about 1.2s), then the Hero name (about 1.8s).
+    const desktopTrace = this.options.desktopTrace;
+    if (desktopTrace) {
+      await desktopTrace.play(buildOsTrace(desktopTrace.layout()));
+      if (this.isFinished) return;
+    }
+    await this.outlineTracer.startTrace(NAME_TRACE_MS, () => this.releaseLayout());
 
     this.finish();
   }
 
   public skipToEnd(): void {
     if (this.isFinished) return;
-    this.commandRunner.cancel();
+    this.clearTimers();
     this.outlineTracer.completeImmediately();
     this.finish();
   }
@@ -151,8 +197,10 @@ export class IntroSequenceController {
   private finish(): void {
     if (this.isFinished) return;
     this.isFinished = true;
-    this.isRunning = false;
+    this.phase = 'handover';
+    this.clearTimers();
     this.releaseLayout();
+    this.options.desktopTrace?.finish();
 
     if (this.overlay) {
       this.overlay.style.opacity = '0';
@@ -166,8 +214,9 @@ export class IntroSequenceController {
 
   public dispose(): void {
     this.releaseLayout();
-    this.commandRunner.cancel();
+    this.clearTimers();
     this.outlineTracer.dispose();
+    this.view?.dispose();
     if (this.overlay) {
       this.overlay.removeEventListener('pointerdown', this.boundPointerHandler);
     }
