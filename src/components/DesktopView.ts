@@ -126,8 +126,9 @@ export function updateOrder(order: readonly WindowId[], state: DesktopState): Wi
 }
 
 export function formatClock(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const h = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${h % 12 || 12}:${minutes} ${h < 12 ? 'AM' : 'PM'}`;
 }
 
 export type EscapeAction = 'leave-stage' | 'close-window' | 'none';

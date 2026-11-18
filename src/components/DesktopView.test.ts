@@ -101,9 +101,14 @@ describe('updateOrder', () => {
 });
 
 describe('formatClock', () => {
-  it('pads to HH:MM', () => {
-    expect(formatClock(new Date(2026, 10, 13, 7, 5))).toBe('07:05');
-    expect(formatClock(new Date(2026, 10, 13, 18, 42))).toBe('18:42');
+  it('formats as 12-hour h:MM AM/PM', () => {
+    expect(formatClock(new Date(2026, 10, 13, 7, 5))).toBe('7:05 AM');
+    expect(formatClock(new Date(2026, 10, 13, 18, 42))).toBe('6:42 PM');
+  });
+
+  it('shows 12 for midnight and noon', () => {
+    expect(formatClock(new Date(2026, 10, 13, 0, 0))).toBe('12:00 AM');
+    expect(formatClock(new Date(2026, 10, 13, 12, 30))).toBe('12:30 PM');
   });
 });
 

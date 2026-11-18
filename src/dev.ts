@@ -16,6 +16,11 @@ import { PROJECTS } from './data/projects';
 import { createDesktopTraceView } from './components/DesktopTraceView';
 import { createViewportLayoutAdapter } from './components/ViewportLayoutAdapter';
 import { mountPowerMenu } from './components/PowerMenu';
+import { mountSettingsPanel } from './components/SettingsPanel';
+import { mountPhosphorCursor } from './components/PhosphorCursor';
+import { keepOnTopLayer } from './components/TopLayer';
+import { DEFAULT_SETTINGS, type Settings } from './components/Settings';
+import { createScreensaverController, type ScreensaverController } from './components/ScreensaverController';
 import { tactileAudio } from './components/TactileAudio';
 
 // Enforce manual scroll restoration so reloading always starts at the top
@@ -74,6 +79,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
   }
 
+  const cursor = document.querySelector<HTMLElement>('.phosphor-cursor');
+  const crtOverlay = document.querySelector<HTMLElement>('.crt-overlay');
+  if (cursor) mountPhosphorCursor(cursor);
+  keepOnTopLayer([cursor, crtOverlay].filter((el): el is HTMLElement => el !== null)); // cursor first: CRT covers it
+
+  let settings: Settings = DEFAULT_SETTINGS;
+  let screensaver: ScreensaverController | null = null;
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
+  if (settingsBtn instanceof HTMLButtonElement && settingsPanel) {
+    mountSettingsPanel(
+      { trigger: settingsBtn, panel: settingsPanel },
+      {
+        onChange(s) {
+          settings = s;
+        },
+        onPreview() {
+          screensaver?.preview();
+        },
+      },
+    );
+  }
+
   const root = document.getElementById('desktop');
   const surface = document.getElementById('deskSurface');
   const icons = document.getElementById('deskIcons');
@@ -109,6 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     },
   );
   desktop.mount();
+  screensaver = createScreensaverController({
+    getSettings: () => settings,
+    isStagePlaying: () => Object.values(desktop.getState().stages).includes('loaded'),
+    isReady: () => desktop.isRevealed(),
+  });
   mountAdmin?.();
   deepLinkHistory = new DeepLinkHistory(() => desktop.dispatch({ type: 'back' }));
   heroSource?.remove();

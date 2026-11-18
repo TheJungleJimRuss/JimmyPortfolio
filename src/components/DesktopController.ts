@@ -142,6 +142,11 @@ export class DesktopController {
     if (this.announceTimer) clearTimeout(this.announceTimer);
   }
 
+  /** True once the Desktop has been revealed (the Boot shell and intro are done). */
+  isRevealed(): boolean {
+    return !this.isBooting();
+  }
+
   getState(): DesktopState {
     return this.state;
   }

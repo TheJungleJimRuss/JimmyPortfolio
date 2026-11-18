@@ -1,9 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-crt="on">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
+    <script>
+      // Phosphor color and CRT filter (on unless stored off) before first paint. Key and shape ({v, settings:{phosphor, crt}}) mirror SETTINGS_KEY in src/components/Settings.ts.
+      try {
+        var raw = JSON.parse(localStorage.getItem('portfolio.dev.settings'));
+        if (raw.v !== 1) throw 0;
+        var st = raw.settings;
+        var p = st.phosphor;
+        if (p === 'green' || p === 'amber' || p === 'white' || p === 'blue') document.documentElement.dataset.phosphor = p;
+        var c = st.crt;
+        if (c === 'off') document.documentElement.dataset.crt = 'off'; // anything else, including old low/med/high, stays on
+      } catch (e) {}
+    </script>
     <title>Jimmy Russ — Dev &amp; Game Systems</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -70,10 +82,53 @@
           </div>
         </div>
         <div id="taskbarButtons" class="taskbar-buttons" role="toolbar" aria-label="Open windows"></div>
+        <button id="settingsBtn" class="taskbar-settings" type="button" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false"
+          commandfor="settingsPanel" command="toggle-popover">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.5l1.1 1.6 1.9-.4.5 1.9 1.9.6-.5 1.9L14.5 8l-1.6 1.1.4 1.9-1.9.5-.6 1.9-1.9-.5L8 14.5l-1.1-1.6-1.9.4-.5-1.9-1.9-.6.5-1.9L1.5 8l1.6-1.1-.4-1.9 1.9-.5.6-1.9 1.9.5z"/></svg>
+        </button>
+        <div id="settingsPanel" class="settings-panel" popover="auto" role="dialog" aria-labelledby="settingsTitle">
+          <h2 id="settingsTitle" class="settings-title">Settings</h2>
+          <fieldset class="settings-group">
+            <legend>Screensaver</legend>
+            <div class="settings-options">
+              <!-- A new saver is one more line here (value = ScreensaverKind) plus one entry in SaverLayer's RENDERERS. -->
+              <label class="settings-opt"><input type="radio" name="screensaver" value="letterDrift" checked /><span>Letter drift</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="lineTrace" /><span>Line trace</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="bouncingName" /><span>Bouncing name</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="dronePatrol" /><span>Drone patrol</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="none" /><span>None</span></label>
+            </div>
+            <div class="settings-options settings-wait">
+              <span class="settings-wait-label" id="settingsWaitLabel">Wait</span>
+              <div class="settings-options" role="radiogroup" aria-labelledby="settingsWaitLabel">
+                <label class="settings-opt"><input type="radio" name="wait" value="30" /><span>30s</span></label>
+                <label class="settings-opt"><input type="radio" name="wait" value="60" checked /><span>1m</span></label>
+                <label class="settings-opt"><input type="radio" name="wait" value="300" /><span>5m</span></label>
+              </div>
+              <button type="button" class="settings-preview" data-settings-preview>Preview</button>
+            </div>
+          </fieldset>
+          <fieldset class="settings-group">
+            <legend>Phosphor</legend>
+            <div class="settings-options">
+              <label class="settings-opt"><input type="radio" name="phosphor" value="green" checked /><span class="settings-swatch" data-swatch="green" aria-hidden="true"></span><span>Green</span></label>
+              <label class="settings-opt"><input type="radio" name="phosphor" value="amber" /><span class="settings-swatch" data-swatch="amber" aria-hidden="true"></span><span>Amber</span></label>
+              <label class="settings-opt"><input type="radio" name="phosphor" value="white" /><span class="settings-swatch" data-swatch="white" aria-hidden="true"></span><span>White</span></label>
+              <label class="settings-opt"><input type="radio" name="phosphor" value="blue" /><span class="settings-swatch" data-swatch="blue" aria-hidden="true"></span><span>Blue</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="settings-group">
+            <legend>CRT</legend>
+            <label class="settings-switch"><span>Filter</span><input type="checkbox" role="switch" name="crt" checked aria-label="CRT filter" /></label>
+          </fieldset>
+          <button type="button" class="settings-reset" data-settings-reset>Reset to defaults</button>
+        </div>
         <time id="taskbarClock" class="taskbar-clock"></time>
       </div>
       <div id="deskLive" class="visually-hidden" role="status" aria-live="polite"></div>
     </div>
+    <div class="phosphor-cursor" popover="manual" aria-hidden="true"></div>
+    <div class="crt-overlay" popover="manual" aria-hidden="true"></div>
 
     <!-- Hero name content: DesktopController moves it into the Hero window. -->
     <div id="heroSource" hidden>

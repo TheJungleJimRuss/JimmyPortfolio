@@ -2,6 +2,8 @@
 > History: `.agents/NOTES_ARCHIVE.md`. Keep this file under ~100 lines; move finished work to the top of the archive.
 
 ## Status
+2026-11-18 — CRT filter is now an on/off switch, on by default (former High look), covering the Power menu, Settings panel and a drawn Phosphor cursor; 377 tests pass, Desktop budget 23.27 KB gzip.
+2026-11-18 — Settings panel (spec + tickets 01-07 in `.agents/issues/settings-panel/`) built on branch `feat/settings-panel` (uncommitted): Screensaver (4 savers), Phosphor color, CRT filter. 372 tests pass, Desktop budget 22.41 KB gzip; browser-checked at 375/768/812x375/1440.
 2026-11-16 — Power menu replaces `← GATEWAY` on the Taskbar (uncommitted); 311 tests pass, browser-checked at 1024 and 375.
 2026-11-14 — Mobile pass and Dev Desktop tickets 01-11 are done (uncommitted, branch `feat/desktop-state-reducer`). `npm run build` exits 0 with the Desktop JS budget at 16.41 KB gzip of 350; 291 Vitest tests pass; browser-checked at 375/768/1024 and landscape.
 
@@ -30,6 +32,7 @@ Dual-site portfolio (Dev + Drone). Dev Desktop (spec `.agents/issues/dev-portfol
   - Graceful fallback to the DOM/CSS layer hero when WebGL is unavailable. CSS fallback (`HeroNameDualIdentity.ts`) mirrors tilt ±36° yaw / ±28° pitch, translation ±18px X / ±12px Y.
 - **Intro trace** (`HeroOutlineTracer.ts`): 1,800ms constant-speed `linear` trace, 50ms cascade, `stroke-dasharray`/`dashoffset` scaled by the live CTM scale. The hero transitions the moment the last stroke closes: 850ms `heroMaterializeBloom` (green bloom → mint-white → `#F0F4F8`), SVG outline fade-out 650ms, tactile bass tone. Dev mode activates immediately on gateway launch; all terminal UI is removed after the intro.
 - **Page transitions**: `<meta name="color-scheme" content="dark">` + inline `#000000` background in both pages' `<head>`, `@view-transition { navigation: auto; }`, 160ms `.page-is-exiting` fade on gateway/dev links. `src/dev.ts` sets `history.scrollRestoration = 'manual'` and `scrollTo(0, 0)` on load, `pageshow` and `beforeunload`.
+- **Settings panel** (`Settings.ts` model, `SettingsPanel.ts`, Taskbar right-end gear): stored under localStorage `portfolio.dev.settings` `{v:1,settings}`; the inline head script in `dev.html` mirrors the key, version and allowed values, so keep them in sync. Phosphor colors are `[data-phosphor]` token blocks in `tokens.css` (`--phosphor`, `--phosphor-rgb`, …); `--desk-green*` is gone. CRT is `'on'|'off'` (old low/med/high read as on; `<html data-crt="on">` by default). The CRT overlay and `PhosphorCursor` are `popover="manual"`; `TopLayer.ts` re-shows them (cursor, then overlay) whenever another popover opens so they stay above it. The cursor replaces the system pointer only on `(pointer: fine)` while CRT is on. Both hide while a saver layer exists (saver z 10003). Savers are a lazy chunk (`SaverLayer.ts`); to add one: a `SaverMotion` + `SaverRenderer` in `savers/`, a `RENDERERS` entry, a `ScreensaverKind` value and a radio in `dev.html`.
 - **Desktop JS budget**: `build/desktopBudget.ts` (Vite plugin) fails `npm run build` if `dev.html`'s entry + static imports exceed 350 KB gzip, and prints sizes each build. Three.js is Gateway-only (`main` chunk); keep it out of `src/dev.ts` imports.
 - **Persona**: `PersonaController` switches "dev"/"drone" with URL query param support and localStorage persistence.
 - **Audio**: Jimmy will write and produce the original soundtrack; tactile SFX (typing, clicks, rotor spool); unfiltered clean playback.
@@ -43,6 +46,8 @@ Dual-site portfolio (Dev + Drone). Dev Desktop (spec `.agents/issues/dev-portfol
 - When changing `src/components/`, run `npm test` to catch regressions in `PersonaController.test.ts`.
 
 ## Next steps
+- Settings panel: commit `feat/settings-panel` (user's call). Optional cleanups from review: shared popover controller for Power menu + Settings, shared canvas/`--phosphor`/calm-tick helpers for savers, derived alpha tokens declared once.
+- `formatClock` in `DesktopView.ts` was switched to 12-hour AM/PM outside the Settings work; confirm it's intended.
 - Commit the mobile pass + Dev Desktop work (large uncommitted diff; user's call).
 - Fill the `[ ... ]` copy slots (projects, About, Contact) in `src/data/`; the user writes all copy.
 - Open: iOS Simulator Safari check (needs full Xcode); landscape-phone "PROJECTS" cue sits tight under RUSS on the Gateway; `PersonaController` is unreferenced by the app (tested only), delete or reuse for the Drone side.

@@ -1,3 +1,47 @@
+/* Neutral phosphor tokens (Dev portfolio). Default is Green; the Dev page sets
+   data-phosphor on <html> (head script + Settings panel). The Gateway never sets it, so it stays green.
+   Alpha variants derive from --phosphor-rgb. */
+:root,
+:root[data-phosphor='green'] {
+  --phosphor: #00ff41;
+  --phosphor-rgb: 0, 255, 65;
+  --phosphor-mid: rgba(var(--phosphor-rgb), 0.55);
+  --phosphor-dim: rgba(var(--phosphor-rgb), 0.28);
+  --phosphor-faint: rgba(var(--phosphor-rgb), 0.07);
+  --phosphor-trace-dim: rgba(var(--phosphor-rgb), 0.2);
+  --phosphor-glow: rgba(var(--phosphor-rgb), 0.85);
+}
+
+:root[data-phosphor='amber'] {
+  --phosphor: #ffb000;
+  --phosphor-rgb: 255, 176, 0;
+  --phosphor-mid: rgba(var(--phosphor-rgb), 0.55);
+  --phosphor-dim: rgba(var(--phosphor-rgb), 0.28);
+  --phosphor-faint: rgba(var(--phosphor-rgb), 0.07);
+  --phosphor-trace-dim: rgba(var(--phosphor-rgb), 0.2);
+  --phosphor-glow: rgba(var(--phosphor-rgb), 0.85);
+}
+
+:root[data-phosphor='white'] {
+  --phosphor: #e8f0ee;
+  --phosphor-rgb: 232, 240, 238;
+  --phosphor-mid: rgba(var(--phosphor-rgb), 0.55);
+  --phosphor-dim: rgba(var(--phosphor-rgb), 0.28);
+  --phosphor-faint: rgba(var(--phosphor-rgb), 0.07);
+  --phosphor-trace-dim: rgba(var(--phosphor-rgb), 0.2);
+  --phosphor-glow: rgba(var(--phosphor-rgb), 0.85);
+}
+
+:root[data-phosphor='blue'] {
+  --phosphor: #64b5f6;
+  --phosphor-rgb: 100, 181, 246;
+  --phosphor-mid: rgba(var(--phosphor-rgb), 0.55);
+  --phosphor-dim: rgba(var(--phosphor-rgb), 0.28);
+  --phosphor-faint: rgba(var(--phosphor-rgb), 0.07);
+  --phosphor-trace-dim: rgba(var(--phosphor-rgb), 0.2);
+  --phosphor-glow: rgba(var(--phosphor-rgb), 0.85);
+}
+
 :root {
   /* Cursor & Scroll reactive properties */
   --mouse-x: 50vw;

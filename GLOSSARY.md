@@ -33,7 +33,7 @@ The Dev portfolio's surface after the Intro sequence: an OS-like desktop with ic
 _Avoid_: Home screen, OS, dashboard
 
 **Taskbar**:
-The bar along the bottom of the Desktop that lists open windows and holds the exit to the Gateway.
+The bar along the bottom of the Desktop that lists open windows, with the Power menu at its left end and the Settings panel's button at its right end.
 _Avoid_: Dock, nav, footer
 
 **Hero window**:
@@ -65,8 +65,20 @@ The Desktop window that holds the ways to reach the owner.
 _Avoid_: Contact page, contact form
 
 **Screensaver**:
-What the Desktop shows after the visitor has been idle for a while: the Hero name's letters drift apart over black until the visitor returns.
+What the Desktop shows after the visitor has been idle for their chosen wait: one of Letter drift (the default, the Hero name's letters drifting apart over black), Line trace, Bouncing name or Drone patrol, until the visitor returns. A playing Project stage holds it off.
 _Avoid_: Idle mode, sleep, attract mode
+
+**Settings panel**:
+The panel that opens from the right end of the Taskbar, where the visitor picks the Screensaver, the Phosphor color and whether the CRT filter is on; the visitor's choices are remembered on their next visit.
+_Avoid_: Settings window, preferences, control panel
+
+**Phosphor color**:
+The single color the whole Dev portfolio draws in, as on a monochrome monitor: Green (the default), Amber, White or Blue.
+_Avoid_: Theme, accent, skin
+
+**CRT filter**:
+An old-monitor look (scanlines, a dark vignette, faint flicker) laid over the whole Dev portfolio, its menus and the pointer; on by default, switched on or off in the Settings panel.
+_Avoid_: Retro mode, scanline effect
 
 ## Intro
 

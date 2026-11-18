@@ -1,0 +1,36 @@
+/* Saver layer: the CRT overlay and Phosphor cursor hide while it is present (desktop.css), so the filter never tints it. Lazy-loaded with SaverLayer.ts. */
+.saver-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10003;
+  background: #000;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 250ms ease;
+  cursor: none;
+  touch-action: none;
+}
+
+.saver-layer.is-on {
+  opacity: 1;
+}
+
+.saver-letter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-hero, 'Outfit', sans-serif);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--phosphor);
+  text-shadow: 0 0 0.12em var(--phosphor-mid);
+  transition: transform var(--saver-ease, 0ms) ease-in-out;
+  will-change: transform;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saver-layer {
+    transition: none;
+  }
+}
