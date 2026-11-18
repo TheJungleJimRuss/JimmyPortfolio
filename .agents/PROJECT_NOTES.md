@@ -2,6 +2,7 @@
 > History: `.agents/NOTES_ARCHIVE.md`. Keep this file under ~100 lines; move finished work to the top of the archive.
 
 ## Status
+2026-11-18 — More savers (spec + tickets in `.agents/issues/more-savers/`) built on branch `feat/more-savers` (uncommitted): Pathfinder, Life, Circuit, Contours, Terrain, plus Random; one flat radio list (categories removed). The user cut Letter drift, Oscilloscope, Harmonograph and Radar. 426 tests pass, Desktop budget 23.51 KB gzip; browser-checked.
 2026-11-18 — CRT filter is now an on/off switch, on by default (former High look), covering the Power menu, Settings panel and a drawn Phosphor cursor; 377 tests pass, Desktop budget 23.27 KB gzip.
 2026-11-18 — Settings panel (spec + tickets 01-07 in `.agents/issues/settings-panel/`) built on branch `feat/settings-panel` (uncommitted): Screensaver (4 savers), Phosphor color, CRT filter. 372 tests pass, Desktop budget 22.41 KB gzip; browser-checked at 375/768/812x375/1440.
 2026-11-16 — Power menu replaces `← GATEWAY` on the Taskbar (uncommitted); 311 tests pass, browser-checked at 1024 and 375.
@@ -46,6 +47,7 @@ Dual-site portfolio (Dev + Drone). Dev Desktop (spec `.agents/issues/dev-portfol
 - When changing `src/components/`, run `npm test` to catch regressions in `PersonaController.test.ts`.
 
 ## Next steps
+- More savers: committed and pushed on `feat/more-savers` (2026-11-18), not merged to main; saver labels are placeholders the user will rename. Life replays the same run each cycle (seeded from the name).
 - Settings panel: commit `feat/settings-panel` (user's call). Optional cleanups from review: shared popover controller for Power menu + Settings, shared canvas/`--phosphor`/calm-tick helpers for savers, derived alpha tokens declared once.
 - `formatClock` in `DesktopView.ts` was switched to 12-hour AM/PM outside the Settings work; confirm it's intended.
 - Commit the mobile pass + Dev Desktop work (large uncommitted diff; user's call).

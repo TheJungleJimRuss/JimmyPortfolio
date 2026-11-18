@@ -21,3 +21,20 @@ export function screensaverShouldShow(i: IdleInputs): boolean {
   if (i.previewing) return true;
   return i.now - i.lastInputAt >= i.wait * 1000;
 }
+
+/** A saver the layer can draw: a concrete kind, never `random` or `none`. */
+export type PlayableSaver = Exclude<ScreensaverKind, 'random' | 'none'>;
+
+/** The saver to start for a setting. `random` picks from `pool` without repeating `last`; `none` gives null. */
+export function resolveSaverKind(
+  kind: ScreensaverKind,
+  last: PlayableSaver | null,
+  rand: () => number,
+  pool: readonly PlayableSaver[],
+): PlayableSaver | null {
+  if (kind === 'none') return null;
+  if (kind !== 'random') return kind;
+  const others = pool.filter((k) => k !== last);
+  const from = others.length ? others : pool;
+  return from.length ? from[Math.min(from.length - 1, Math.floor(rand() * from.length))] : null;
+}

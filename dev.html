@@ -90,11 +90,16 @@
           <h2 id="settingsTitle" class="settings-title">Settings</h2>
           <fieldset class="settings-group">
             <legend>Screensaver</legend>
-            <div class="settings-options">
-              <!-- A new saver is one more line here (value = ScreensaverKind) plus one entry in SaverLayer's RENDERERS. -->
-              <label class="settings-opt"><input type="radio" name="screensaver" value="letterDrift" /><span>Letter drift</span></label>
+            <!-- Saver labels are placeholders: the owner will rename them. A new saver is one more line here (value = ScreensaverKind) plus one entry in SaverLayer's RENDERERS. -->
+            <div class="settings-savers">
               <label class="settings-opt"><input type="radio" name="screensaver" value="lineTrace" checked /><span>Line trace</span></label>
               <label class="settings-opt"><input type="radio" name="screensaver" value="bouncingName" /><span>Bouncing name</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="pathfinder" /><span>Pathfinder</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="life" /><span>Life</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="circuit" /><span>Circuit</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="contours" /><span>Contours</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="terrain" /><span>Terrain</span></label>
+              <label class="settings-opt"><input type="radio" name="screensaver" value="random" /><span>Random</span></label>
               <label class="settings-opt"><input type="radio" name="screensaver" value="none" /><span>None</span></label>
             </div>
             <div class="settings-options settings-wait">

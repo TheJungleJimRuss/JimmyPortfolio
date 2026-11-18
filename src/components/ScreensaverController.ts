@@ -3,7 +3,7 @@
  * `screensaverShouldShow` says so, lazy-loads the saver layer and starts the chosen saver. Any input ends it,
  * and the press that ends it is swallowed so it never reaches the Desktop underneath.
  */
-import { screensaverShouldShow } from './Screensaver';
+import { screensaverShouldShow, resolveSaverKind, type PlayableSaver } from './Screensaver';
 import type { Settings } from './Settings';
 import type { SaverSession } from './SaverLayer';
 
@@ -41,6 +41,7 @@ export function createScreensaverController(deps: ScreensaverDeps): ScreensaverC
   let starting = false; // layer import in flight
   let startedAt = 0;
   let swallowUntil = 0;
+  let lastKind: PlayableSaver | null = null; // memory only: Random never repeats the saver shown last this visit
   let anchor: { x: number; y: number } | null = null; // pointer position when the saver started
 
   function end(): void {
@@ -59,8 +60,10 @@ export function createScreensaverController(deps: ScreensaverDeps): ScreensaverC
         previewing = false;
         return;
       }
-      session = layer.startSaver(deps.getSettings().screensaver, { calm: reduced.matches });
+      const kind = resolveSaverKind(deps.getSettings().screensaver, lastKind, Math.random, layer.playableSavers());
+      session = kind ? layer.startSaver(kind, { calm: reduced.matches }) : null;
       if (session) {
+        lastKind = kind;
         startedAt = now();
         anchor = null;
       } else previewing = false;

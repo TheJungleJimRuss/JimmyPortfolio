@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  SCREENSAVERS,
   DEFAULT_SETTINGS,
   SETTINGS_KEY,
   parseSettings,
@@ -54,6 +55,21 @@ describe('parseSettings', () => {
       settings: { screensaver: 'bogus', wait: 300, phosphor: 'amber', crt: 7 },
     });
     expect(parseSettings(raw)).toEqual({ ...DEFAULT_SETTINGS, wait: 300, phosphor: 'amber' });
+  });
+
+  it('round-trips every Screensaver value, including the new savers and random', () => {
+    for (const kind of SCREENSAVERS) {
+      const s: Settings = { ...DEFAULT_SETTINGS, screensaver: kind };
+      expect(parseSettings(serializeSettings(s)).screensaver).toBe(kind);
+    }
+    for (const k of ['pathfinder', 'life', 'circuit', 'contours', 'terrain', 'random']) {
+      expect(SCREENSAVERS).toContain(k);
+    }
+    for (const gone of ['letterDrift', 'oscilloscope', 'harmonograph', 'radar']) {
+      expect(SCREENSAVERS).not.toContain(gone);
+      const raw = JSON.stringify({ v: 1, settings: { ...DEFAULT_SETTINGS, screensaver: gone } });
+      expect(parseSettings(raw).screensaver).toBe(DEFAULT_SETTINGS.screensaver);
+    }
   });
 
   it('rejects a wait that is not 30, 60 or 300', () => {

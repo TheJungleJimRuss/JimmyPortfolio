@@ -6,16 +6,25 @@
  */
 import '../styles/saver.css';
 import type { ScreensaverKind } from './Settings';
+import type { PlayableSaver } from './Screensaver';
 import type { SaverRenderer } from './savers/SaverRenderer';
 import type { SaverViewport } from './savers/SaverMotion';
-import { letterDriftView } from './savers/LetterDriftView';
 import { lineTraceView } from './savers/LineTraceView';
 import { bouncingNameView } from './savers/BouncingNameView';
+import { pathfinderView } from './savers/PathfinderView';
+import { lifeView } from './savers/LifeView';
+import { circuitView } from './savers/CircuitView';
+import { contoursView } from './savers/ContoursView';
+import { terrainView } from './savers/TerrainView';
 
-const RENDERERS: Partial<Record<ScreensaverKind, SaverRenderer<any>>> = {
-  letterDrift: letterDriftView,
+const RENDERERS: Partial<Record<PlayableSaver, SaverRenderer<any>>> = {
   lineTrace: lineTraceView,
   bouncingName: bouncingNameView,
+  pathfinder: pathfinderView,
+  life: lifeView,
+  circuit: circuitView,
+  contours: contoursView,
+  terrain: terrainView,
 };
 
 export interface SaverSession {
@@ -33,8 +42,13 @@ export function hasSaver(kind: ScreensaverKind): boolean {
   return kind in RENDERERS;
 }
 
+/** The kinds that can be drawn today: what `random` chooses from. */
+export function playableSavers(): PlayableSaver[] {
+  return Object.keys(RENDERERS) as PlayableSaver[];
+}
+
 /** Starts the saver for `kind`, or returns null when there is none (`none`, or a kind not built yet). */
-export function startSaver(kind: ScreensaverKind, { calm, seed = (Date.now() & 0xffffff) >>> 0 }: SaverOptions): SaverSession | null {
+export function startSaver(kind: PlayableSaver, { calm, seed = (Date.now() & 0xffffff) >>> 0 }: SaverOptions): SaverSession | null {
   const renderer = RENDERERS[kind];
   if (!renderer) return null;
 
