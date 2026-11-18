@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { assessBuild, isLoopbackHost, resolveBuildUrl, type ProbedFile } from './KccBuild';
+import { assessBuild, isLoopbackHost, resolveBuildUrl, syncEscapeLock, type ProbedFile } from './KccBuild';
 
 const MB = 1024 * 1024;
 const f = (over: Partial<ProbedFile> = {}): ProbedFile => ({ ok: true, contentType: 'text/javascript', contentEncoding: 'br', length: null, ...over });
@@ -34,5 +34,30 @@ describe('paths', () => {
   it('recognises loopback hosts', () => {
     expect(isLoopbackHost('localhost')).toBe(true);
     expect(isLoopbackHost('thejunglejimruss.github.io')).toBe(false);
+  });
+});
+
+describe('syncEscapeLock', () => {
+  const kb = () => {
+    const calls: string[] = [];
+    return { calls, lock: async (keys: string[]) => void calls.push('lock:' + keys.join()), unlock: () => void calls.push('unlock') };
+  };
+  const stage = {} as Element;
+  it('claims Esc for the game while the stage is fullscreen', () => {
+    const k = kb();
+    syncEscapeLock(stage, stage, k);
+    expect(k.calls).toEqual(['lock:Escape']);
+  });
+  it('releases Esc when fullscreen ends or another element is fullscreen', () => {
+    const k = kb();
+    syncEscapeLock(null, stage, k);
+    syncEscapeLock({} as Element, stage, k);
+    expect(k.calls).toEqual(['unlock', 'unlock']);
+  });
+  it('does nothing without the Keyboard Lock API, and swallows a rejected lock', async () => {
+    expect(() => syncEscapeLock(stage, stage, undefined)).not.toThrow();
+    const rejecting = { lock: () => Promise.reject(new Error('not top-level')), unlock: () => {} };
+    expect(() => syncEscapeLock(stage, stage, rejecting)).not.toThrow();
+    await Promise.resolve();
   });
 });

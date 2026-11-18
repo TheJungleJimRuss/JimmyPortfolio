@@ -89,3 +89,25 @@ export function hasWebGL2(): boolean {
   }
   return webgl2Cached;
 }
+
+/** The parts of the Keyboard Lock API we use (Chromium only; not in TypeScript's DOM lib). */
+export interface KeyboardLock {
+  lock(keyCodes: string[]): Promise<void>;
+  unlock(): void;
+}
+
+export function keyboardLock(): KeyboardLock | undefined {
+  return (navigator as Navigator & { keyboard?: Partial<KeyboardLock> }).keyboard?.lock
+    ? (navigator as unknown as { keyboard: KeyboardLock }).keyboard
+    : undefined;
+}
+
+/**
+ * Browsers spend Esc on leaving fullscreen. While the game stage is fullscreen, claim Esc so it reaches the
+ * game (its pause menu); holding Esc still leaves fullscreen. Must run in the top-level page.
+ */
+export function syncEscapeLock(fullscreenEl: Element | null, stage: Element, kb: KeyboardLock | undefined): void {
+  if (!kb) return;
+  if (fullscreenEl === stage) kb.lock(['Escape']).catch(() => {});
+  else kb.unlock();
+}

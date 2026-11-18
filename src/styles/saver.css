@@ -1,4 +1,4 @@
-/* Saver layer: the CRT overlay and Phosphor cursor hide while it is present (desktop.css), so the filter never tints it. Lazy-loaded with SaverLayer.ts. */
+/* Saver layer: the CRT overlay stays above it (top layer, z-index 10004 as fallback); the Phosphor cursor hides while it is present (desktop.css). Lazy-loaded with SaverLayer.ts. */
 .saver-layer {
   position: fixed;
   inset: 0;

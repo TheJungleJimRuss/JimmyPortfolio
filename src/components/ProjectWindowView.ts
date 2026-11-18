@@ -1,6 +1,6 @@
 import type { Inline, ProjectEntry, WriteUp, WriteUpBlock } from '../data/projects';
 import type { DesktopAction, DesktopState } from './DesktopState';
-import { hasWebGL2, probeBuild, resolveBuildUrl } from './KccBuild';
+import { hasWebGL2, keyboardLock, probeBuild, resolveBuildUrl, syncEscapeLock } from './KccBuild';
 import {
   findProject,
   KEYBOARD_HINT,
@@ -250,6 +250,10 @@ export function createProjectWindow(slug: string, dispatch: (a: DesktopAction) =
       if (e.origin === location.origin && e.source === iframe?.contentWindow && e.data?.type === 'kcc:error') fail();
     };
     const later = () => setTimeout(sync, 0);
+    const onFullscreen = () => {
+      if (iframe) syncEscapeLock(document.fullscreenElement, iframe, keyboardLock());
+    };
+    document.addEventListener('fullscreenchange', onFullscreen);
     window.addEventListener('message', onMessage);
     window.addEventListener('blur', later);
     window.addEventListener('focus', later);
@@ -257,6 +261,8 @@ export function createProjectWindow(slug: string, dispatch: (a: DesktopAction) =
     document.addEventListener('pointerdown', later, true);
     teardown = () => {
       alive = false;
+      document.removeEventListener('fullscreenchange', onFullscreen);
+      keyboardLock()?.unlock();
       window.removeEventListener('message', onMessage);
       window.removeEventListener('blur', later);
       window.removeEventListener('focus', later);

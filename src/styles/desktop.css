@@ -2,8 +2,16 @@
    DESKTOP: the Dev portfolio surface (windows, icons, Taskbar).
    Phosphor green on black. Flat chrome: hairline borders, no glow.
    ========================================================================== */
+/* No white on the Dev side: every shared text token resolves to the phosphor color.
+   desktop.css loads only on dev.html, so the Gateway keeps its own text colors. */
 :root {
-  --desk-text: #f0f4f8;
+  --desk-text: var(--phosphor);
+  --text-main: var(--phosphor);
+  --text-bright: var(--phosphor);
+  --text-primary: var(--phosphor);
+  --text-muted: var(--phosphor-mid);
+  --text-label: var(--phosphor-mid);
+  --text-dim: var(--phosphor-dim);
   --desk-taskbar-h: 48px;
   --desk-titlebar-h: 34px;
   --desk-font: var(--font-mono, ui-monospace, Menlo, monospace);
@@ -367,6 +375,7 @@ body {
 
 .fx-row-name {
   flex: 1;
+  color: var(--phosphor);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -1009,7 +1018,7 @@ a.pw-link:hover {
   border-color: var(--phosphor);
 }
 
-/* The radio stays in the accessibility tree and keeps focus; the swatch and label are its visible face. */
+/* The radio stays in the accessibility tree and keeps focus; the label is its visible face. */
 .settings-opt input {
   position: absolute;
   inset: 0;
@@ -1017,17 +1026,6 @@ a.pw-link:hover {
   opacity: 0;
   cursor: pointer;
 }
-
-.settings-swatch {
-  width: 12px;
-  height: 12px;
-  background: var(--swatch);
-}
-
-.settings-swatch[data-swatch='green'] { --swatch: #00ff41; }
-.settings-swatch[data-swatch='amber'] { --swatch: #ffb000; }
-.settings-swatch[data-swatch='white'] { --swatch: #e8f0ee; }
-.settings-swatch[data-swatch='blue'] { --swatch: #64b5f6; }
 
 .settings-wait {
   margin-top: 8px;
@@ -1334,7 +1332,8 @@ body.is-powering-off .desktop {
    The overlay and the Phosphor cursor are `popover="manual"` so they sit in the top layer, above the Power menu and
    Settings panel popovers (TopLayer.ts re-raises them whenever another popover opens). Before script runs, or
    without the Popover API, z-index 10002 keeps the overlay above windows, the Taskbar (10000) and the intro
-   trace (10001). While a Screensaver plays, both step aside so the filter never tints it. */
+   trace (10001), and the Screensaver layer (10003). The overlay also covers a playing Screensaver; only the
+   Phosphor cursor steps aside then. */
 .crt-overlay,
 .phosphor-cursor {
   position: fixed;
@@ -1349,7 +1348,7 @@ body.is-powering-off .desktop {
   pointer-events: none;
 }
 .crt-overlay {
-  z-index: 10002;
+  z-index: 10004;
   display: block;
   background:
     radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%),
@@ -1361,8 +1360,7 @@ body.is-powering-off .desktop {
       rgba(0, 0, 0, 0.24) 2px
     );
 }
-:root[data-crt='off'] .crt-overlay,
-:root:has(.saver-layer) .crt-overlay { display: none; }
+:root[data-crt='off'] .crt-overlay { display: none; }
 
 @keyframes crt-flicker {
   0%, 100% { opacity: 1; }

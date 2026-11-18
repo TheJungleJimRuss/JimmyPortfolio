@@ -125,7 +125,7 @@
   visibility: hidden !important;
 }
 
-/* Materialized state: fills in solid text with organic phosphor bloom settling to white */
+/* Materialized state: fills in solid text with organic phosphor bloom settling to the theme color */
 @keyframes heroMaterializeBloom {
   0% {
     opacity: 0;
@@ -141,12 +141,12 @@
   }
   65% {
     opacity: 1;
-    color: color-mix(in srgb, var(--phosphor) 18%, var(--text-main));
+    color: var(--phosphor);
     text-shadow: 0 0 10px rgba(var(--phosphor-rgb), 0.25);
   }
   100% {
     opacity: 1;
-    color: var(--text-main);
+    color: var(--phosphor);
     text-shadow: none;
     transform: scale(1);
   }
@@ -163,7 +163,7 @@
   .wf-hero-name.is-materialized {
     animation: none !important;
     opacity: 1 !important;
-    color: var(--text-main) !important;
+    color: var(--phosphor) !important;
     text-shadow: none !important;
     transform: none !important;
   }
